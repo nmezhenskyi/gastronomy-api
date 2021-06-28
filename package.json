@@ -1,0 +1,26 @@
+{
+   "name": "gastronomy-api",
+   "version": "1.0.0",
+   "description": "",
+   "main": "index.js",
+   "scripts": {
+      "build": "tsc",
+      "watch": "tsc -w",
+      "dev": "nodemon dist/index.js",
+      "start": "node dist/index.js"
+   },
+   "author": "Nikita Mezhenskyi",
+   "license": "ISC",
+   "devDependencies": {
+      "@types/express": "^4.17.12",
+      "@types/node": "^15.12.5",
+      "nodemon": "^2.0.7",
+      "typescript": "^4.3.4"
+   },
+   "dependencies": {
+      "express": "^4.17.1",
+      "pg": "^8.6.0",
+      "reflect-metadata": "^0.1.13",
+      "typeorm": "^0.2.34"
+   }
+}

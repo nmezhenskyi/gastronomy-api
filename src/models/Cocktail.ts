@@ -17,10 +17,10 @@ export class Cocktail {
    @Column('text')
    description: string
 
-   @Column()
+   @Column('text')
    ingredients: string
 
-   @Column()
+   @Column('text')
    method: string
 
    @Column()

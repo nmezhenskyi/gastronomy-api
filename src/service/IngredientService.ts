@@ -4,6 +4,26 @@ import { getRepository } from 'typeorm'
 
 export default class IngredientService {
    /**
+    * Finds ingredients in the database that match given conditions.
+    * @param searchBy Search condition
+    * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with found data.
+    */
+    static async find(searchBy?: { type?: string  }): Promise<ServiceResponse> {
+      try {
+         const repository = getRepository(Ingredient)
+
+         const found = await repository.find(searchBy)
+
+         if (!found || found.length === 0) return { success: true, body: null, message: 'Nothing found' }
+
+         return { success: true, body: found }
+      }
+      catch (err) {
+         return { success: false, message: err }
+      }
+   }
+
+   /**
     * Saves the ingredient to the database.
     * @param item 
     * @returns 
@@ -20,26 +40,6 @@ export default class IngredientService {
          const saved = await repository.save(ingredient)
 
          return { success: true, body: saved, message: 'Ingredient added'  }
-      }
-      catch (err) {
-         return { success: false, message: err }
-      }
-   }
-
-   /**
-    * Finds ingredients in the database that match given conditions.
-    * @param searchBy 
-    * @returns 
-    */
-   static async find(searchBy?: { type?: string  }): Promise<ServiceResponse> {
-      try {
-         const repository = getRepository(Ingredient)
-
-         const found = await repository.find(searchBy)
-
-         if (!found || found.length === 0) return { success: true, body: null, message: 'Nothing found' }
-
-         return { success: true, body: found }
       }
       catch (err) {
          return { success: false, message: err }

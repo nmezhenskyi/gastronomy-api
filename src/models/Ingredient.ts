@@ -7,6 +7,7 @@ import {
    OneToMany
 } from 'typeorm'
 import { CocktailToIngredient } from './CocktailToIngredient'
+import { MealToIngredient } from './MealToIngredient'
 
 @Entity()
 export class Ingredient {
@@ -32,8 +33,11 @@ export class Ingredient {
    })
    description: string
 
-   @OneToMany(() => CocktailToIngredient, cocktailToIngredient => cocktailToIngredient.ingredient, { nullable: true })
+   @OneToMany(() => CocktailToIngredient, cocktailToIngredient => cocktailToIngredient.ingredient)
    ingredientToCoktails: CocktailToIngredient[]
+
+   @OneToMany(() => MealToIngredient, mealToIngredient => mealToIngredient.ingredient)
+   ingredientToMeals: MealToIngredient[]
 
    @CreateDateColumn()
    createdAt!: Date

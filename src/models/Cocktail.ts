@@ -23,7 +23,7 @@ export class Cocktail {
       type: 'text',
       nullable: true
    })
-   description: string
+   description: string | null
 
    @Column('text')
    method!: string
@@ -32,19 +32,19 @@ export class Cocktail {
       type: 'text',
       nullable: true
    })
-   notesOnIngredients: string
+   notesOnIngredients: string | null
 
    @Column({
       type: 'text',
       nullable: true
    })
-   notesOnExecution: string
+   notesOnExecution: string | null
 
    @Column({
       type: 'text',
       nullable: true
    })
-   notesOnTaste: string
+   notesOnTaste: string | null
 
    @OneToMany(() => CocktailToIngredient, cocktailToIngredient => cocktailToIngredient.cocktail, { eager: true })
    cocktailToIngredients!: CocktailToIngredient[]

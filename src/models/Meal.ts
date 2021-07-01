@@ -23,14 +23,14 @@ export class Meal {
       type: 'text',
       nullable: true
    })
-   description: string
+   description: string | null
 
    @Column({
       type: 'varchar',
       length: 20,
       nullable: true
    })
-   cuisine: string
+   cuisine: string | null
 
    @Column('text')
    cookingInstructions!: string

@@ -31,7 +31,7 @@ export class Ingredient {
       type: 'text',
       nullable: true
    })
-   description: string
+   description: string | null
 
    @OneToMany(() => CocktailToIngredient, cocktailToIngredient => cocktailToIngredient.ingredient)
    ingredientToCoktails: CocktailToIngredient[]

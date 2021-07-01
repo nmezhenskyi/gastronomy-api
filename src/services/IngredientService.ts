@@ -93,7 +93,7 @@ export default class IngredientService {
 
          const ingredient = await repository.findOne({ id: item.id })
 
-         if (!ingredient) return { success: false, body: null, message: 'NOT_FOUND' }
+         if (!ingredient) return { success: false, message: 'NOT_FOUND' }
 
          if (item.type) ingredient.type = item.type
          if (item.name) ingredient.name = item.name

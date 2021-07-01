@@ -134,6 +134,10 @@ export default class CocktailService {
    }
 
    /**
+    * @todo Add Ingredient, Remove Ingredient
+    */
+
+   /**
     * Removes specified ingredient from the database.
     * 
     * @param id id of the ingredient to be removed

@@ -13,10 +13,7 @@ export class Cocktail {
    @PrimaryGeneratedColumn('uuid')
    id!: string
 
-   @Column({
-      length: 100,
-      unique: true
-   })
+   @Column({ length: 100 })
    name!: string
 
    @Column({

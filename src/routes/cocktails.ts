@@ -1,6 +1,6 @@
 import express from 'express'
 //import { body, validationResult } from 'express-validator'
-import CocktailService from '../service/CocktailService'
+import CocktailService from '../services/CocktailService'
 
 const router = express.Router()
 
@@ -8,7 +8,7 @@ const router = express.Router()
  * @route   GET /cocktails
  */
 router.get('/', async (_, res) => {
-   const result = await CocktailService.findAll()
+   const result = await CocktailService.find()
 
    if (!result.success) return res.status(500).json({ message: result.message })
 

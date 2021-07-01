@@ -1,6 +1,6 @@
 import express from 'express'
 import { body, validationResult } from 'express-validator'
-import IngredientService from '../service/IngredientService'
+import IngredientService from '../services/IngredientService'
 
 const router = express.Router()
 

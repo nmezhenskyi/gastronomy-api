@@ -1,6 +1,8 @@
-import { Cocktail } from '../models/Cocktail'
-import ServiceResponse from './ServiceResponse'
 import { getRepository } from 'typeorm'
+import { Cocktail } from '../models/Cocktail'
+import { CocktailToIngredient } from '../models/CocktailToIngredient'
+import ServiceResponse from './ServiceResponse'
+import IngredientService from './IngredientService'
 
 export default class CocktailService {
    /**
@@ -134,8 +136,77 @@ export default class CocktailService {
    }
 
    /**
-    * @todo Add Ingredient, Remove Ingredient
+    * Adds the ingredient from the database to the cocktail in the database. 
+    * 
+    * @param cocktailId Cocktail id
+    * @param ingredient Existing ingredient id or new ingredient object
+    * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery the with created record.
     */
+   static async addIngredient(cocktailId: string, ingredient: string | { type: string, name: string, description?: string },
+   amount: string): Promise<ServiceResponse> {
+      try {
+         const cocktailRepository = getRepository(Cocktail)
+         const cocktail = await cocktailRepository.findOne({ id: cocktailId })
+         if (!cocktail) return { success: false, message: 'NOT_FOUND' }
+
+         let ingredientResponse: ServiceResponse
+
+         // Existing ingredient id is passed
+         if (typeof ingredient === 'string')
+            ingredientResponse = await IngredientService.findOne({ id: ingredient })
+         // New ingredient object is passed
+         else
+            ingredientResponse = await IngredientService.create({ type: ingredient.type, name: ingredient.name, description: ingredient.description})
+
+         if (ingredientResponse.message === 'FAILED') return { success: false, message: 'FAILED' }
+         if (ingredientResponse.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
+
+         const cocktailToIngredientRepository = getRepository(CocktailToIngredient)
+         const cocktailToIngredient = new CocktailToIngredient()
+         cocktailToIngredient.cocktail = cocktail
+         cocktailToIngredient.ingredient = ingredientResponse.body
+         cocktailToIngredient.amount = amount
+
+         const saved = await cocktailToIngredientRepository.save(cocktailToIngredient)
+
+         return {
+            success: true,
+            message: 'UPDATED',
+            body: saved
+         }
+      }
+      catch (err) {
+         return { success: false, message: 'FAILED' }
+      }
+   }
+
+   /**
+    * Removes the association between specified cocktail and ingredient from the database.
+    * 
+    * @param cocktailId Cocktail id
+    * @param ingredientId Ingredient id
+    * @returns ServiceResponse object with 'success' property.
+    */
+   static async removeIngredient(cocktailId: string, ingredientId: string): Promise<ServiceResponse> {
+      try {
+         const repository = getRepository(CocktailToIngredient)
+
+         const found = await repository.findOne({ cocktailId, ingredientId })
+
+         if (!found) return { success: false, message: 'NOT_FOUND' }
+
+         await repository.remove(found)
+
+         return {
+            success: true,
+            message: 'REMOVED',
+            body: null
+         }
+      }
+      catch (err) {
+         return { success: false, message: 'FAILED' }
+      }
+   }
 
    /**
     * Removes specified ingredient from the database.

@@ -1,6 +1,6 @@
+import { getRepository } from 'typeorm'
 import { Ingredient } from '../models/Ingredient'
 import ServiceResponse from './ServiceResponse'
-import { getRepository } from 'typeorm'
 
 export default class IngredientService {
    /**
@@ -34,7 +34,7 @@ export default class IngredientService {
     * @param searchBy Search condition
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with found ingredient object.
     */
-   static async findOne(searchBy: { id: string, type?: string } | { id?: string, type: string }): Promise<ServiceResponse> {
+   static async findOne(searchBy: { id: string, name?: string } | { id?: string, name: string }): Promise<ServiceResponse> {
       try {
          const repository = getRepository(Ingredient)
 

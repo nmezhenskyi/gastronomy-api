@@ -124,7 +124,7 @@ export default class IngredientService {
 
          const found = await repository.findOne({ id })
 
-         if (!found) return { success: false, message: "NOT_FOUND" }
+         if (!found) return { success: false, message: 'NOT_FOUND' }
 
          await repository.remove(found)
 

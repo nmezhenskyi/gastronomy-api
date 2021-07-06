@@ -13,9 +13,8 @@ const router = express.Router()
 router.get('/', async (_, res) => {
    const result = await IngredientService.find()
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: result.message })
-
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: result.message })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server Error: Query failed' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Nothing found' })
 
    return res.status(200).json(result.body)
 })
@@ -29,9 +28,8 @@ router.get('/', async (_, res) => {
 router.get('/:id', async (req, res) => {
    const result = await IngredientService.findOne({ id: req.params.id })
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: result.message })
-
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: result.message })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server Error: Query failed' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Ingredient not found' })
 
    return res.status(200).json(result.body)
 })
@@ -49,7 +47,7 @@ body('description').isLength({ max: 5000 }).trim(),
 async (req, res) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Invalid data', errors: errors.array() })
+      return res.status(400).json({ message: 'Error: Invalid data', errors: errors.array() })
 
    const result = await IngredientService.create({
       type: req.body.type,
@@ -57,7 +55,7 @@ async (req, res) => {
       description: req.body.description
    })
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: result.message })
+   if (result.message === 'FAILED') return res.status(500).json({ message: `Server Error: Couldn't create the ingredient` })
 
    return res.status(200).json(result.body)
 })
@@ -75,9 +73,9 @@ body('description').isLength({ max: 5000 }).trim(),
 async (req, res) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Invalid data', errors: errors.array() })
+      return res.status(400).json({ message: 'Error: Invalid data', errors: errors.array() })
 
-   if (!req.params || !req.params.id) return res.status(400).json({ message: 'Ingredient id is missing in the request URI' })
+   if (!req.params || !req.params.id) return res.status(400).json({ message: 'Error: Ingredient id is missing in the request URI' })
 
    const result = await IngredientService.update({
       id: req.params.id,
@@ -86,7 +84,8 @@ async (req, res) => {
       description: req.body.description
    })
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: result.message })
+   if (result.message === 'FAILED') return res.status(500).json({ message: `Server Error: Couldn't update the ingredient` })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Ingredient not found' })
 
    return res.status(200).json(result)
 })
@@ -100,9 +99,8 @@ async (req, res) => {
 router.delete('/:id', async (req, res) => {
    const result = await IngredientService.remove(req.params.id)
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't delete the ingredient` })
-
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: `Ingredient not found` })
+   if (result.message === 'FAILED') return res.status(500).json({ message: `Server Error: Couldn't delete the ingredient` })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Ingredient not found' })
 
    return res.status(200).json({ message: 'Ingredient have been deleted' })
 })

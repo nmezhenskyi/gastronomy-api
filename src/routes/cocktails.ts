@@ -103,7 +103,7 @@ async (req, res) => {
 })
 
 /**
- * Add ingredient to the cocktail
+ * Add ingredient to the cocktail.
  * 
  * @route   PUT /cocktails/:id/ingredients
  * @access  Public

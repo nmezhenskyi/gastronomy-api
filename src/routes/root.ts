@@ -4,6 +4,7 @@ const router = express.Router()
 
 router.get('/', (_, res) => {
    const rootDocument = {
+      documentation: 'https://github.com/nmezhenskyi/gastronomy-api',
       links: [
          {
             rel: 'ingredient',

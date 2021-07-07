@@ -34,7 +34,7 @@ export class Ingredient {
    description: string | null
 
    @OneToMany(() => CocktailToIngredient, cocktailToIngredient => cocktailToIngredient.ingredient)
-   ingredientToCoktails: CocktailToIngredient[]
+   cocktails: CocktailToIngredient[]
 
    @OneToMany(() => MealToIngredient, mealToIngredient => mealToIngredient.ingredient)
    ingredientToMeals: MealToIngredient[]

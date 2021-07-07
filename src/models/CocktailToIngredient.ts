@@ -20,10 +20,10 @@ export class CocktailToIngredient {
    @Column()
    amount!: string
 
-   @ManyToOne(() => Cocktail, cocktail => cocktail.cocktailToIngredients, { onDelete: 'CASCADE' })
+   @ManyToOne(() => Cocktail, cocktail => cocktail.ingredients, { onDelete: 'CASCADE' })
    cocktail!: Cocktail
 
-   @ManyToOne(() => Ingredient, ingredient => ingredient.ingredientToCoktails, { onDelete: 'SET NULL' })
+   @ManyToOne(() => Ingredient, ingredient => ingredient.cocktails, { onDelete: 'SET NULL' })
    ingredient!: Ingredient
 
    @CreateDateColumn()

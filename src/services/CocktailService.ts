@@ -15,7 +15,10 @@ export default class CocktailService {
       try {
          const repository = getRepository(Cocktail)
 
-         const found = await repository.find(searchBy)
+         const found = await repository.find({
+            select: ['id', 'name', 'description', 'notesOnTaste'],
+            where: searchBy
+         })
 
          if (!found || found.length === 0) return { success: false, message: 'NOT_FOUND' }
 
@@ -40,7 +43,20 @@ export default class CocktailService {
       try {
          const repository = getRepository(Cocktail)
 
-         const found = await repository.findOne(searchBy)
+         const found = await repository.createQueryBuilder('c')
+            .select([
+               'c.id', 'c.name', 'c.description', 'c.method',
+               'c.notesOnIngredients', 'c.notesOnExecution', 'c.notesOnTaste'
+            ])
+            .addSelect(['cti.amount'])
+            .addSelect(['i.id', 'i.name', 'i.type', 'i.description'])
+            .where(`${
+               (searchBy.id && searchBy.name) ? 'c.id = :id AND c.name = :name' :
+               (searchBy.id ? 'c.id = :id' : (searchBy.name ? 'c.name = :name' : ''))
+            }`, { id: searchBy.id, name: searchBy.name })
+            .innerJoin('c.ingredients', 'cti')
+            .innerJoin('cti.ingredient', 'i')
+            .getOne()
 
          if (!found) return { success: false, message: 'NOT_FOUND' }
 

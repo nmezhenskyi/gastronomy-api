@@ -43,8 +43,8 @@ export class Cocktail {
    })
    notesOnTaste: string | null
 
-   @OneToMany(() => CocktailToIngredient, cocktailToIngredient => cocktailToIngredient.cocktail, { eager: true })
-   cocktailToIngredients!: CocktailToIngredient[]
+   @OneToMany(() => CocktailToIngredient, cocktailToIngredient => cocktailToIngredient.cocktail)
+   ingredients!: CocktailToIngredient[]
 
    @CreateDateColumn()
    createdAt!: Date

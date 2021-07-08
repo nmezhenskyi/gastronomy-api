@@ -2,14 +2,14 @@ import { getRepository } from 'typeorm'
 import { Ingredient } from '../models/Ingredient'
 import ServiceResponse from './ServiceResponse'
 
-export default class IngredientService {
+const IngredientService = {
    /**
     * Finds ingredients in the database that match given conditions.
     * 
     * @param searchBy Search condition
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with array of found ingredients.
     */
-   static async find(searchBy?: { type?: string  }): Promise<ServiceResponse> {
+   async find(searchBy?: { type?: string  }): Promise<ServiceResponse> {
       try {
          const repository = getRepository(Ingredient)
 
@@ -26,7 +26,7 @@ export default class IngredientService {
       catch (err) {
          return { success: false, message: 'FAILED' }
       }
-   }
+   },
 
    /**
     * Finds one ingredient in the database that matches given conditions.
@@ -34,7 +34,7 @@ export default class IngredientService {
     * @param searchBy Search condition
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with found ingredient object.
     */
-   static async findOne(searchBy: { id: string, name?: string } | { id?: string, name: string }): Promise<ServiceResponse> {
+   async findOne(searchBy: { id: string, name?: string } | { id?: string, name: string }): Promise<ServiceResponse> {
       try {
          const repository = getRepository(Ingredient)
 
@@ -51,7 +51,7 @@ export default class IngredientService {
       catch (err) {
          return { success: false, message: 'FAILED' }
       }
-   }
+   },
 
    /**
     * Saves the ingredient to the database.
@@ -59,7 +59,7 @@ export default class IngredientService {
     * @param item New ingredient object
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with created ingredient object.
     */
-   static async create(item: { type: string, name: string, description?: string }): Promise<ServiceResponse> {
+   async create(item: { type: string, name: string, description?: string }): Promise<ServiceResponse> {
       try {
          const repository = getRepository(Ingredient)
 
@@ -79,7 +79,7 @@ export default class IngredientService {
       catch (err) {
          return { success: false, message: 'FAILED' }
       }
-   }
+   },
 
    /**
     * Updates the ingredient in the database.
@@ -87,7 +87,7 @@ export default class IngredientService {
     * @param item Updated ingredient object
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with updated ingredient object.
     */
-   static async update(item: { id: string, type?: string, name?: string, description?: string }): Promise<ServiceResponse> {
+   async update(item: { id: string, type?: string, name?: string, description?: string }): Promise<ServiceResponse> {
       try {
          const repository = getRepository(Ingredient)
 
@@ -110,7 +110,7 @@ export default class IngredientService {
       catch (err) {
          return { success: false, message: 'FAILED' }
       }
-   }
+   },
 
    /**
     * Removes specified ingredient from the database.
@@ -118,7 +118,7 @@ export default class IngredientService {
     * @param id id of the ingredient to be removed
     * @returns ServiceResponse object with 'success' property.
     */
-   static async remove(id: string): Promise<ServiceResponse> {
+   async remove(id: string): Promise<ServiceResponse> {
       try {
          const repository = getRepository(Ingredient)
 
@@ -139,3 +139,5 @@ export default class IngredientService {
       }
    }
 }
+
+export default IngredientService

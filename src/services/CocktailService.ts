@@ -4,14 +4,14 @@ import { CocktailToIngredient } from '../models/CocktailToIngredient'
 import ServiceResponse from './ServiceResponse'
 import IngredientService from './IngredientService'
 
-export default class CocktailService {
+const CocktailService = {
    /**
     * Finds cocktails in the database that match given conditions.
     * 
     * @param searchBy Search condition
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with array of found cocktails.
     */
-   static async find(searchBy?: { name?: string }): Promise<ServiceResponse> {
+   async find(searchBy?: { name?: string }): Promise<ServiceResponse> {
       try {
          const repository = getRepository(Cocktail)
 
@@ -31,7 +31,7 @@ export default class CocktailService {
       catch (err) {
          return { success: false, message: 'FAILED' }
       }
-   }
+   },
 
    /**
     * Finds one cocktail in the database that matches given conditions.
@@ -39,7 +39,7 @@ export default class CocktailService {
     * @param searchBy Search condition
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with found cocktail object.
     */
-   static async findOne(searchBy: { id: string, name?: string } | { id?: string, name: string }): Promise<ServiceResponse> {
+   async findOne(searchBy: { id: string, name?: string } | { id?: string, name: string }): Promise<ServiceResponse> {
       try {
          const repository = getRepository(Cocktail)
 
@@ -69,7 +69,7 @@ export default class CocktailService {
       catch (err) {
          return { success: false, message: 'FAILED' }
       }
-   }
+   },
 
    /**
     * Saves the cocktail to the database.
@@ -77,7 +77,7 @@ export default class CocktailService {
     * @param item New cocktail object
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with created cocktail object.
     */
-   static async create(item: {
+   async create(item: {
       name: string,
       description?: string,
       method: string,
@@ -107,7 +107,7 @@ export default class CocktailService {
       catch (err) {
          return { success: false, message: 'FAILED' }
       }
-   }
+   },
 
    /**
     * Updates the cocktail in the database.
@@ -115,7 +115,7 @@ export default class CocktailService {
     * @param item Updated cocktail object
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with updated cocktail object.
     */
-   static async update(item: {
+   async update(item: {
       id: string,
       name?: string,
       description?: string,
@@ -149,7 +149,7 @@ export default class CocktailService {
       catch (err) {
          return { success: false, message: 'FAILED' }
       }
-   }
+   },
 
    /**
     * Adds the ingredient from the database to the cocktail in the database. 
@@ -158,7 +158,7 @@ export default class CocktailService {
     * @param ingredient Existing ingredient id or new ingredient object
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery the with created record.
     */
-   static async addIngredient(cocktailId: string, ingredient: string | { type: string, name: string, description?: string },
+   async addIngredient(cocktailId: string, ingredient: string | { type: string, name: string, description?: string },
    amount: string): Promise<ServiceResponse> {
       try {
          const cocktailRepository = getRepository(Cocktail)
@@ -194,7 +194,7 @@ export default class CocktailService {
       catch (err) {
          return { success: false, message: 'FAILED' }
       }
-   }
+   },
 
    /**
     * Removes the association between specified cocktail and ingredient from the database.
@@ -203,7 +203,7 @@ export default class CocktailService {
     * @param ingredientId Ingredient id
     * @returns ServiceResponse object with 'success' property.
     */
-   static async removeIngredient(cocktailId: string, ingredientId: string): Promise<ServiceResponse> {
+   async removeIngredient(cocktailId: string, ingredientId: string): Promise<ServiceResponse> {
       try {
          const repository = getRepository(CocktailToIngredient)
 
@@ -222,7 +222,7 @@ export default class CocktailService {
       catch (err) {
          return { success: false, message: 'FAILED' }
       }
-   }
+   },
 
    /**
     * Removes specified ingredient from the database.
@@ -230,7 +230,7 @@ export default class CocktailService {
     * @param id id of the ingredient to be removed
     * @returns ServiceResponse object with 'success' property.
     */
-   static async remove(id: string): Promise<ServiceResponse> {
+   async remove(id: string): Promise<ServiceResponse> {
       try {
          const repository = getRepository(Cocktail)
 
@@ -251,3 +251,5 @@ export default class CocktailService {
       }
    }
 }
+
+export default CocktailService

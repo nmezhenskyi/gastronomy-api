@@ -9,15 +9,20 @@ const CocktailService = {
     * Finds cocktails in the database that match given conditions.
     * 
     * @param searchBy Search condition
+    * @param offset Search offset
+    * @param limit Search limit
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with array of found cocktails.
     */
-   async find(searchBy?: { name?: string }): Promise<ServiceResponse> {
+   async find(searchBy?: { name?: string }, offset = 0, limit = 10): Promise<ServiceResponse> {
       try {
          const repository = getRepository(Cocktail)
 
          const found = await repository.find({
             select: ['id', 'name', 'description', 'notesOnTaste'],
-            where: searchBy
+            where: searchBy,
+            order: { createdAt: 'DESC' },
+            skip: offset,
+            take: limit
          })
 
          if (!found || found.length === 0) return { success: false, message: 'NOT_FOUND' }

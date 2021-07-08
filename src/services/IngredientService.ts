@@ -9,11 +9,16 @@ const IngredientService = {
     * @param searchBy Search condition
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with array of found ingredients.
     */
-   async find(searchBy?: { type?: string  }): Promise<ServiceResponse> {
+   async find(searchBy?: { type?: string  }, offset = 0, limit = 10): Promise<ServiceResponse> {
       try {
          const repository = getRepository(Ingredient)
 
-         const found = await repository.find(searchBy)
+         const found = await repository.find({
+            where: searchBy,
+            order: { createdAt: 'DESC' },
+            skip: offset,
+            take: limit
+         })
 
          if (!found || found.length === 0) return { success: false, message: 'NOT_FOUND' }
 

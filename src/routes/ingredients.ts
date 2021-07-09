@@ -1,8 +1,17 @@
-import express from 'express'
+import express, { Request } from 'express'
 import { body, validationResult } from 'express-validator'
 import IngredientService from '../services/IngredientService'
+import { paramToInt } from '../common/utils'
 
 const router = express.Router()
+
+/**
+ * Represents query parameters for the ```GET /ingredients``` request.
+ */
+ interface GetIngredientsQuery {
+   offset: string,
+   limit: string
+}
 
 /**
  * Retrieve ingredients.
@@ -10,8 +19,10 @@ const router = express.Router()
  * @route   GET /ingredients 
  * @access  Public
  */
-router.get('/', async (_, res) => {
-   const result = await IngredientService.find()
+router.get('/', async (req: Request<unknown, unknown, unknown, GetIngredientsQuery>, res) => {
+   const { offset, limit } = req.query
+
+   const result = await IngredientService.find({}, paramToInt(offset), paramToInt(limit))
 
    if (result.message === 'FAILED') return res.status(500).json({ message: 'Server Error: Query failed' })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Nothing found' })

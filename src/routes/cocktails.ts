@@ -1,8 +1,18 @@
-import express from 'express'
+import express, { Request } from 'express'
 import { body, validationResult } from 'express-validator'
 import CocktailService from '../services/CocktailService'
+import { paramToInt } from '../common/utils'
 
 const router = express.Router()
+
+/**
+ * Represents query parameters for the ```GET /cocktails``` request.
+ */
+interface GetCocktailsQuery {
+   offset: string,
+   limit: string,
+   name: string
+}
 
 /**
  * Retrieve cocktails.
@@ -10,8 +20,10 @@ const router = express.Router()
  * @route   GET /cocktails
  * @access  Public
  */
-router.get('/', async (_, res) => {
-   const result = await CocktailService.find()
+router.get('/', async (req: Request<unknown, unknown, unknown, GetCocktailsQuery>, res) => {
+   const { offset, limit } = req.query
+
+   const result = await CocktailService.find({}, paramToInt(offset), paramToInt(limit))
 
    if (result.message === 'FAILED') return res.status(500).json({ message: 'Server Error: Query failed' })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Nothing found' })

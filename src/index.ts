@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import express from 'express'
 import { createConnection } from 'typeorm'
-import { PORT } from './constants'
+import { PORT } from './common/constants'
 import rootRoute from './routes/root'
 import ingredientsRoute from './routes/ingredients'
 import cocktailsRoute from './routes/cocktails'

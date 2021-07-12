@@ -79,10 +79,10 @@ const CocktailService = {
    /**
     * Saves the cocktail to the database.
     * 
-    * @param item New cocktail object
+    * @param cocktailDto New cocktail object
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with created cocktail object.
     */
-   async create(item: {
+   async create(cocktailDto: {
       name: string,
       description?: string,
       method: string,
@@ -94,12 +94,12 @@ const CocktailService = {
          const repository = getRepository(Cocktail)
 
          const cocktail = new Cocktail()
-         cocktail.name = item.name
-         cocktail.method = item.method
-         if (item.description) cocktail.description = item.description
-         if (item.notesOnIngredients) cocktail.notesOnIngredients = item.notesOnIngredients
-         if (item.notesOnExecution) cocktail.notesOnExecution = item.notesOnExecution
-         if (item.notesOnTaste) cocktail.notesOnTaste = item.notesOnTaste
+         cocktail.name = cocktailDto.name
+         cocktail.method = cocktailDto.method
+         if (cocktailDto.description) cocktail.description = cocktailDto.description
+         if (cocktailDto.notesOnIngredients) cocktail.notesOnIngredients = cocktailDto.notesOnIngredients
+         if (cocktailDto.notesOnExecution) cocktail.notesOnExecution = cocktailDto.notesOnExecution
+         if (cocktailDto.notesOnTaste) cocktail.notesOnTaste = cocktailDto.notesOnTaste
 
          const saved = await repository.save(cocktail)
 
@@ -117,10 +117,10 @@ const CocktailService = {
    /**
     * Updates the cocktail in the database.
     * 
-    * @param item Updated cocktail object
+    * @param cocktailDto Updated cocktail object
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with updated cocktail object.
     */
-   async update(item: {
+   async update(cocktailDto: {
       id: string,
       name?: string,
       description?: string,
@@ -132,16 +132,16 @@ const CocktailService = {
       try {
          const repository = getRepository(Cocktail)
 
-         const cocktail = await repository.findOne({ id: item.id })
+         const cocktail = await repository.findOne({ id: cocktailDto.id })
 
          if (!cocktail) return { success: false, message: 'NOT_FOUND' }
 
-         if (item.name) cocktail.name = item.name
-         if (item.method) cocktail.method = item.method
-         if (item.description) cocktail.description = item.description
-         if (item.notesOnIngredients) cocktail.notesOnIngredients = item.notesOnIngredients
-         if (item.notesOnExecution) cocktail.notesOnExecution = item.notesOnExecution
-         if (item.notesOnTaste) cocktail.notesOnTaste = item.notesOnTaste
+         if (cocktailDto.name) cocktail.name = cocktailDto.name
+         if (cocktailDto.method) cocktail.method = cocktailDto.method
+         if (cocktailDto.description) cocktail.description = cocktailDto.description
+         if (cocktailDto.notesOnIngredients) cocktail.notesOnIngredients = cocktailDto.notesOnIngredients
+         if (cocktailDto.notesOnExecution) cocktail.notesOnExecution = cocktailDto.notesOnExecution
+         if (cocktailDto.notesOnTaste) cocktail.notesOnTaste = cocktailDto.notesOnTaste
 
          const saved = await repository.save(cocktail)
 
@@ -230,9 +230,9 @@ const CocktailService = {
    },
 
    /**
-    * Removes specified ingredient from the database.
+    * Removes specified cocktail from the database.
     * 
-    * @param id id of the ingredient to be removed
+    * @param id Id of the cocktail to be removed
     * @returns ServiceResponse object with 'success' property.
     */
    async remove(id: string): Promise<ServiceResponse> {

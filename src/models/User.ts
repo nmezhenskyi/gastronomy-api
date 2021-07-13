@@ -3,7 +3,7 @@ import {
    PrimaryGeneratedColumn,
    Column,
    CreateDateColumn,
-   UpdateDateColumn
+   UpdateDateColumn,
 } from 'typeorm'
 
 @Entity()
@@ -11,17 +11,21 @@ export class User {
    @PrimaryGeneratedColumn('uuid')
    id!: string
 
-   @Column({ length: 50 })
+   @Column({ length: 255 })
    name!: string
 
-   @Column()
+   @Column({ length: 255 })
    email!: string
 
-   @Column()
+   @Column({ length: 50 })
    password!: string
 
-   @Column({ type: 'date' })
-   dateOfBith!: Date
+   @Column({
+      type: 'varchar',
+      length: 100,
+      nullable: true
+   })
+   location: string | null
 
    @CreateDateColumn()
    createdAt!: Date

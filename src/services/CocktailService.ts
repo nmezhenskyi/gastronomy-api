@@ -13,7 +13,7 @@ const CocktailService = {
     * @param limit Search limit
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with array of found cocktails.
     */
-   async find(searchBy?: { name?: string }, offset = 0, limit = 10): Promise<ServiceResponse> {
+   async find(searchBy?: { name?: string }, offset = 0, limit = 10): Promise<ServiceResponse<Cocktail[]>> {
       try {
          const repository = getRepository(Cocktail)
 
@@ -44,7 +44,7 @@ const CocktailService = {
     * @param searchBy Search condition
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with found cocktail object.
     */
-   async findOne(searchBy: { id: string, name?: string } | { id?: string, name: string }): Promise<ServiceResponse> {
+   async findOne(searchBy: { id: string, name?: string } | { id?: string, name: string }): Promise<ServiceResponse<Cocktail>> {
       try {
          const repository = getRepository(Cocktail)
 
@@ -89,7 +89,7 @@ const CocktailService = {
       notesOnIngredients?: string,
       notesOnExecution?: string,
       notesOnTaste?: string
-   }): Promise<ServiceResponse> {
+   }): Promise<ServiceResponse<Cocktail>> {
       try {
          const repository = getRepository(Cocktail)
 
@@ -128,7 +128,7 @@ const CocktailService = {
       notesOnIngredients?: string,
       notesOnExecution?: string,
       notesOnTaste?: string
-   }): Promise<ServiceResponse> {
+   }): Promise<ServiceResponse<Cocktail>> {
       try {
          const repository = getRepository(Cocktail)
 
@@ -164,13 +164,13 @@ const CocktailService = {
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery the with created record.
     */
    async addIngredient(cocktailId: string, ingredient: string | { type: string, name: string, description?: string },
-   amount: string): Promise<ServiceResponse> {
+   amount: string): Promise<ServiceResponse<CocktailToIngredient>> {
       try {
          const cocktailRepository = getRepository(Cocktail)
          const cocktail = await cocktailRepository.findOne({ id: cocktailId })
          if (!cocktail) return { success: false, message: 'NOT_FOUND' }
 
-         let ingredientResponse: ServiceResponse
+         let ingredientResponse: ServiceResponse<any>
 
          // Existing ingredient id is passed
          if (typeof ingredient === 'string')
@@ -208,7 +208,7 @@ const CocktailService = {
     * @param ingredientId Ingredient id
     * @returns ServiceResponse object with 'success' property.
     */
-   async removeIngredient(cocktailId: string, ingredientId: string): Promise<ServiceResponse> {
+   async removeIngredient(cocktailId: string, ingredientId: string): Promise<ServiceResponse<null>> {
       try {
          const repository = getRepository(CocktailToIngredient)
 
@@ -235,7 +235,7 @@ const CocktailService = {
     * @param id Id of the cocktail to be removed
     * @returns ServiceResponse object with 'success' property.
     */
-   async remove(id: string): Promise<ServiceResponse> {
+   async remove(id: string): Promise<ServiceResponse<null>> {
       try {
          const repository = getRepository(Cocktail)
 

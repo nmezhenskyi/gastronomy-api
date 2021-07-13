@@ -9,7 +9,7 @@ const IngredientService = {
     * @param searchBy Search condition
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with array of found ingredients.
     */
-   async find(searchBy?: { type?: string  }, offset = 0, limit = 10): Promise<ServiceResponse> {
+   async find(searchBy?: { type?: string  }, offset = 0, limit = 10): Promise<ServiceResponse<Ingredient[]>> {
       try {
          const repository = getRepository(Ingredient)
 
@@ -39,7 +39,7 @@ const IngredientService = {
     * @param searchBy Search condition
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with found ingredient object.
     */
-   async findOne(searchBy: { id: string, name?: string } | { id?: string, name: string }): Promise<ServiceResponse> {
+   async findOne(searchBy: { id: string, name?: string } | { id?: string, name: string }): Promise<ServiceResponse<Ingredient>> {
       try {
          const repository = getRepository(Ingredient)
 
@@ -61,17 +61,17 @@ const IngredientService = {
    /**
     * Saves the ingredient to the database.
     * 
-    * @param item New ingredient object
+    * @param ingredientDto New ingredient object
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with created ingredient object.
     */
-   async create(item: { type: string, name: string, description?: string }): Promise<ServiceResponse> {
+   async create(ingredientDto: { type: string, name: string, description?: string }): Promise<ServiceResponse<Ingredient>> {
       try {
          const repository = getRepository(Ingredient)
 
          const ingredient = new Ingredient()
-         ingredient.type = item.type
-         ingredient.name = item.name
-         if (item.description) ingredient.description = item.description
+         ingredient.type = ingredientDto.type
+         ingredient.name = ingredientDto.name
+         if (ingredientDto.description) ingredient.description = ingredientDto.description
 
          const saved = await repository.save(ingredient)
 
@@ -89,20 +89,20 @@ const IngredientService = {
    /**
     * Updates the ingredient in the database.
     * 
-    * @param item Updated ingredient object
+    * @param ingredientDto Updated ingredient object
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with updated ingredient object.
     */
-   async update(item: { id: string, type?: string, name?: string, description?: string }): Promise<ServiceResponse> {
+   async update(ingredientDto: { id: string, type?: string, name?: string, description?: string }): Promise<ServiceResponse<Ingredient>> {
       try {
          const repository = getRepository(Ingredient)
 
-         const ingredient = await repository.findOne({ id: item.id })
+         const ingredient = await repository.findOne({ id: ingredientDto.id })
 
          if (!ingredient) return { success: false, message: 'NOT_FOUND' }
 
-         if (item.type) ingredient.type = item.type
-         if (item.name) ingredient.name = item.name
-         if (item.description) ingredient.description = item.description
+         if (ingredientDto.type) ingredient.type = ingredientDto.type
+         if (ingredientDto.name) ingredient.name = ingredientDto.name
+         if (ingredientDto.description) ingredient.description = ingredientDto.description
 
          const saved = await repository.save(ingredient)
 
@@ -123,7 +123,7 @@ const IngredientService = {
     * @param id id of the ingredient to be removed
     * @returns ServiceResponse object with 'success' property.
     */
-   async remove(id: string): Promise<ServiceResponse> {
+   async remove(id: string): Promise<ServiceResponse<null>> {
       try {
          const repository = getRepository(Ingredient)
 

@@ -4,10 +4,10 @@
  * 
  * - ```success``` - Informs whether the database query was successful or failed.
  * - ```message``` - Contains message describing the result of the query.
- * - ```body``` - Contains actual data returned by the query, if any. Present only if 'success' is true.
+ * - ```body``` - Contains actual data of type ```T``` returned by the query, if any. Present only if 'success' is true.
  */
-export default interface ServiceResponse {
+export default interface ServiceResponse<T> {
    success: boolean,
    message: 'FOUND' | 'NOT_FOUND' | 'CREATED' | 'UPDATED' | 'REMOVED' | 'FAILED',
-   body?: any
+   body?: T
 }

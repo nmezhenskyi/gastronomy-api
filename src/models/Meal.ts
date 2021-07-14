@@ -33,7 +33,25 @@ export class Meal {
    cuisine: string | null
 
    @Column('text')
-   cookingInstructions!: string
+   instructions!: string
+
+   @Column({
+      type: 'text',
+      nullable: true
+   })
+   notesOnIngredients: string | null
+
+   @Column({
+      type: 'text',
+      nullable: true
+   })
+   notesOnExecution: string | null
+
+   @Column({
+      type: 'text',
+      nullable: true
+   })
+   notesOnTaste: string | null
 
    @OneToMany(() => MealToIngredient, mealToIngredient => mealToIngredient.meal, { eager: true })
    mealToIngredients!: MealToIngredient[]

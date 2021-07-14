@@ -9,7 +9,7 @@ const IngredientService = {
     * @param searchBy Search condition
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with array of found ingredients.
     */
-   async find(searchBy?: { type?: string  }, offset = 0, limit = 10): Promise<ServiceResponse<Ingredient[]>> {
+   async find(searchBy?: { category?: string  }, offset = 0, limit = 10): Promise<ServiceResponse<Ingredient[]>> {
       try {
          const repository = getRepository(Ingredient)
 
@@ -64,12 +64,12 @@ const IngredientService = {
     * @param ingredientDto New ingredient object
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with created ingredient object.
     */
-   async create(ingredientDto: { type: string, name: string, description?: string }): Promise<ServiceResponse<Ingredient>> {
+   async create(ingredientDto: { category: string, name: string, description?: string }): Promise<ServiceResponse<Ingredient>> {
       try {
          const repository = getRepository(Ingredient)
 
          const ingredient = new Ingredient()
-         ingredient.type = ingredientDto.type
+         ingredient.category = ingredientDto.category
          ingredient.name = ingredientDto.name
          if (ingredientDto.description) ingredient.description = ingredientDto.description
 
@@ -92,7 +92,7 @@ const IngredientService = {
     * @param ingredientDto Updated ingredient object
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with updated ingredient object.
     */
-   async update(ingredientDto: { id: string, type?: string, name?: string, description?: string }): Promise<ServiceResponse<Ingredient>> {
+   async update(ingredientDto: { id: string, category?: string, name?: string, description?: string }): Promise<ServiceResponse<Ingredient>> {
       try {
          const repository = getRepository(Ingredient)
 
@@ -100,7 +100,7 @@ const IngredientService = {
 
          if (!ingredient) return { success: false, message: 'NOT_FOUND' }
 
-         if (ingredientDto.type) ingredient.type = ingredientDto.type
+         if (ingredientDto.category) ingredient.category = ingredientDto.category
          if (ingredientDto.name) ingredient.name = ingredientDto.name
          if (ingredientDto.description) ingredient.description = ingredientDto.description
 

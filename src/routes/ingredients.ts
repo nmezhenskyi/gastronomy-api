@@ -52,7 +52,7 @@ router.get('/:id', async (req, res) => {
  * @access  Public
  */
 router.post('/',
-body('type').notEmpty().isLength({ max: 150 }).trim(),
+body('category').notEmpty().isLength({ max: 150 }).trim(),
 body('name').notEmpty().isLength({ max: 150 }).trim(),
 body('description').isLength({ max: 5000 }).trim(),
 async (req, res) => {
@@ -61,7 +61,7 @@ async (req, res) => {
       return res.status(400).json({ message: 'Error: Invalid data', errors: errors.array() })
 
    const result = await IngredientService.create({
-      type: req.body.type,
+      category: req.body.category,
       name: req.body.name,
       description: req.body.description
    })
@@ -78,7 +78,7 @@ async (req, res) => {
  * @access  Public
  */
 router.put('/:id',
-body('type').isLength({ max: 150 }).trim(),
+body('category').isLength({ max: 150 }).trim(),
 body('name').isLength({ max: 150 }).trim(),
 body('description').isLength({ max: 5000 }).trim(),
 async (req, res) => {
@@ -90,7 +90,7 @@ async (req, res) => {
 
    const result = await IngredientService.update({
       id: req.params.id,
-      type: req.body.type,
+      category: req.body.category,
       name: req.body.name,
       description: req.body.description
    })

@@ -16,13 +16,13 @@ export class Ingredient {
 
    @Column({
       type: 'varchar',
-      length: '150'
+      length: 100
    })
-   type!: string
+   category!: string
 
    @Column({
       type: 'varchar',
-      length: '150',
+      length: 255,
       unique: true
    })
    name!: string

@@ -163,7 +163,7 @@ const CocktailService = {
     * @param ingredient Existing ingredient id or new ingredient object
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery the with created record.
     */
-   async addIngredient(cocktailId: string, ingredient: string | { type: string, name: string, description?: string },
+   async addIngredient(cocktailId: string, ingredient: string | { category: string, name: string, description?: string },
    amount: string): Promise<ServiceResponse<CocktailToIngredient>> {
       try {
          const cocktailRepository = getRepository(Cocktail)
@@ -177,7 +177,7 @@ const CocktailService = {
             ingredientResponse = await IngredientService.findOne({ id: ingredient })
          // New ingredient object is passed
          else
-            ingredientResponse = await IngredientService.create({ type: ingredient.type, name: ingredient.name, description: ingredient.description})
+            ingredientResponse = await IngredientService.create({ category: ingredient.category, name: ingredient.name, description: ingredient.description})
 
          if (ingredientResponse.message === 'FAILED') return { success: false, message: 'FAILED' }
          if (ingredientResponse.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }

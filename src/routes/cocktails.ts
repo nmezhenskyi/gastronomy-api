@@ -122,7 +122,7 @@ async (req, res) => {
  */
 router.put('/:id/ingredients',
 body('ingredientId').isLength({ max: 36 }),
-body('type').isLength({ max: 150 }).trim(),
+body('category').isLength({ max: 150 }).trim(),
 body('name').isLength({ max: 150 }).trim(),
 body('description').isLength({ max: 5000 }).trim(),
 body('amount').notEmpty().isLength({ max: 20 }).trim(),
@@ -139,7 +139,7 @@ async (req, res) => {
    }
    else if (req.body.type && req.body.name) {
       result = await CocktailService.addIngredient(req.params.id, {
-         type: req.body.type,
+         category: req.body.category,
          name: req.body.name,
          description: req.body.description
       }, req.body.amount)

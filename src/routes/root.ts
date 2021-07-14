@@ -7,12 +7,6 @@ router.get('/', (_, res) => {
       documentation: 'https://github.com/nmezhenskyi/gastronomy-api',
       links: [
          {
-            rel: 'ingredient',
-            href: 'http://localhost:3000/ingredients',
-            action: 'GET',
-            description: 'Get ingredients'
-         },
-         {
             rel: 'cocktail',
             href: 'http://localhost:3000/cocktails',
             action: 'GET',
@@ -23,6 +17,12 @@ router.get('/', (_, res) => {
             href: 'http://localhost:3000/meals',
             action: 'GET',
             description: 'Get meal recipes'
+         },
+         {
+            rel: 'ingredient',
+            href: 'http://localhost:3000/ingredients',
+            action: 'GET',
+            description: 'Get ingredients'
          }
       ]
    }

@@ -27,6 +27,13 @@ export class User {
    })
    location: string | null
 
+   @Column({
+      type: 'varchar',
+      length: 255,
+      nullable: true
+   })
+   photo: string | null
+
    @CreateDateColumn()
    createdAt!: Date
 

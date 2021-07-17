@@ -7,6 +7,7 @@ import {
    OneToMany
 } from 'typeorm'
 import { CocktailToIngredient } from './CocktailToIngredient'
+import { CocktailReview } from './CocktailReview'
 
 @Entity()
 export class Cocktail {
@@ -45,6 +46,9 @@ export class Cocktail {
 
    @OneToMany(() => CocktailToIngredient, cocktailToIngredient => cocktailToIngredient.cocktail)
    ingredients!: CocktailToIngredient[]
+
+   @OneToMany(() => CocktailReview, cocktailReview => cocktailReview.cocktail)
+   reviews!: CocktailReview[]
 
    @CreateDateColumn()
    createdAt!: Date

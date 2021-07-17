@@ -7,6 +7,7 @@ import {
    OneToMany
 } from 'typeorm'
 import { MealToIngredient } from './MealToIngredient'
+import { MealReview } from './MealReview'
 
 @Entity()
 export class Meal {
@@ -55,6 +56,9 @@ export class Meal {
 
    @OneToMany(() => MealToIngredient, mealToIngredient => mealToIngredient.meal, { eager: true })
    mealToIngredients!: MealToIngredient[]
+
+   @OneToMany(() => MealReview, mealReview => mealReview.meal)
+   reviews!: MealReview[]
 
    @CreateDateColumn()
    createdAt!: Date

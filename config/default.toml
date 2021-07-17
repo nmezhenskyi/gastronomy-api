@@ -1,0 +1,11 @@
+title = "API Config"
+
+[database]
+type="postgres"
+host="localhost"
+port="5432"
+username="pg-user"
+password="pg-user"
+database-name="gastronomy"
+entities=[ "dist/models/*.js" ]
+migrations=[ "dist/migrations/*.js" ]

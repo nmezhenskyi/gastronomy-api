@@ -10,19 +10,19 @@ router.get('/', (_, res) => {
             rel: 'cocktail',
             href: 'http://localhost:3000/cocktails',
             action: 'GET',
-            description: 'Get cocktail recipes'
+            description: 'Find cocktail recipes'
          },
          {
             rel: 'meal',
             href: 'http://localhost:3000/meals',
             action: 'GET',
-            description: 'Get meal recipes'
+            description: 'Find meal recipes'
          },
          {
             rel: 'ingredient',
             href: 'http://localhost:3000/ingredients',
             action: 'GET',
-            description: 'Get ingredients'
+            description: 'Find ingredients'
          }
       ]
    }

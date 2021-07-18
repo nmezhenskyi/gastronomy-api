@@ -31,7 +31,6 @@ const start = async () => {
       app.use('/ingredients', ingredientsRoute)
       app.use('/cocktails', cocktailsRoute)
 
-      //console.log(config.get('database.port'))
       app.listen(PORT, () => console.log(`Server started on port ${PORT}`))
    }
    catch (err) {

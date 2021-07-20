@@ -2,7 +2,7 @@ import { getRepository } from 'typeorm'
 import { Ingredient } from '../models/ingredient'
 import { ServiceResponse } from './service-response'
 
-const IngredientService = {
+export const IngredientService = {
    /**
     * Finds ingredients in the database that match given conditions.
     * 
@@ -144,5 +144,3 @@ const IngredientService = {
       }
    }
 }
-
-export default IngredientService

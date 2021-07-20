@@ -2,9 +2,9 @@ import { getRepository } from 'typeorm'
 import { Cocktail } from '../models/cocktail'
 import { CocktailToIngredient } from '../models/cocktail-to-ingredient'
 import { ServiceResponse } from './service-response'
-import IngredientService from './ingredient-service'
+import { IngredientService } from './ingredient-service'
 
-const CocktailService = {
+export const CocktailService = {
    /**
     * Finds cocktails in the database that match given conditions.
     * 
@@ -256,5 +256,3 @@ const CocktailService = {
       }
    }
 }
-
-export default CocktailService

@@ -1,6 +1,6 @@
 import { getRepository } from 'typeorm'
 import { Ingredient } from '../models/Ingredient'
-import ServiceResponse from './ServiceResponse'
+import { ServiceResponse } from './ServiceResponse'
 
 const IngredientService = {
    /**

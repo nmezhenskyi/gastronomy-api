@@ -6,7 +6,7 @@
  * - ```message``` - Contains message describing the result of the query.
  * - ```body``` - Contains actual data of type ```T``` returned by the query, if any. Present only if 'success' is true.
  */
-export default interface ServiceResponse<T> {
+export interface ServiceResponse<T> {
    success: boolean,
    message: 'FOUND' | 'NOT_FOUND' | 'CREATED' | 'UPDATED' | 'REMOVED' | 'FAILED',
    body?: T

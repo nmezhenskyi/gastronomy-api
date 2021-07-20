@@ -1,7 +1,7 @@
 import { getRepository } from 'typeorm'
 import { Cocktail } from '../models/Cocktail'
 import { CocktailToIngredient } from '../models/CocktailToIngredient'
-import ServiceResponse from './ServiceResponse'
+import { ServiceResponse } from './ServiceResponse'
 import IngredientService from './IngredientService'
 
 const CocktailService = {

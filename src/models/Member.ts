@@ -22,7 +22,11 @@ export class Member {
    @Column({ length: 50 })
    lastName!: string
 
-   @Column({ length: 255 })
+   @Column({
+      type: 'varchar',
+      length: 255,
+      unique: true
+   })
    email!: string
 
    @Column({ length: 50 })

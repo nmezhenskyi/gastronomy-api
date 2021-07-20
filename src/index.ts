@@ -18,8 +18,8 @@ const start = async () => {
          username: config.get('database.username'),
          password: config.get('database.password'),
          database: config.get('database.database-name'),
-         entities: config.get('database.entities'),
-         migrations: config.get('database.migrations'),
+         entities: config.get('typeorm.entities'),
+         migrations: config.get('typeorm.migrations'),
          synchronize: !PROD,
          logging: !PROD
       } as ConnectionOptions)

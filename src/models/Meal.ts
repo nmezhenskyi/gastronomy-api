@@ -6,8 +6,8 @@ import {
    UpdateDateColumn,
    OneToMany
 } from 'typeorm'
-import { MealToIngredient } from './MealToIngredient'
-import { MealReview } from './MealReview'
+import { MealToIngredient } from './meal-to-ingredient'
+import { MealReview } from './meal-review'
 
 @Entity()
 export class Meal {

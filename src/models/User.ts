@@ -8,10 +8,10 @@ import {
    JoinTable,
    OneToMany
 } from 'typeorm'
-import { Cocktail } from './Cocktail'
-import { Meal } from './Meal'
-import { CocktailReview } from './CocktailReview'
-import { MealReview } from './MealReview'
+import { Cocktail } from './cocktail'
+import { Meal } from './meal'
+import { CocktailReview } from './cocktail-review'
+import { MealReview } from './meal-review'
 
 @Entity()
 export class User {

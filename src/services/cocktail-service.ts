@@ -1,8 +1,8 @@
 import { getRepository } from 'typeorm'
-import { Cocktail } from '../models/Cocktail'
-import { CocktailToIngredient } from '../models/CocktailToIngredient'
-import { ServiceResponse } from './ServiceResponse'
-import IngredientService from './IngredientService'
+import { Cocktail } from '../models/cocktail'
+import { CocktailToIngredient } from '../models/cocktail-to-ingredient'
+import { ServiceResponse } from './service-response'
+import IngredientService from './ingredient-service'
 
 const CocktailService = {
    /**

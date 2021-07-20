@@ -1,7 +1,7 @@
 import { getRepository } from 'typeorm'
 import bcrypt from 'bcrypt'
-import { User } from '../models/User'
-import { ServiceResponse } from './ServiceResponse'
+import { User } from '../models/user'
+import { ServiceResponse } from './service-response'
 
 const UserService = {
    async find(searchBy?: { location?: string }, offset = 0, limit = 10): Promise<ServiceResponse<User[]>> {

@@ -13,7 +13,7 @@ export class RefreshToken {
    @PrimaryGeneratedColumn('uuid')
    id!: string
 
-   @Column()
+   @Column({ unique: true })
    token!: string
 
    @ManyToOne(() => User)

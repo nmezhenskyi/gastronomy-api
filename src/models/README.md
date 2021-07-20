@@ -1,3 +1,3 @@
 ## Entity Relationship Diagram
 
-![ERD](../../assets/ERD.png?raw=true)
+![ERD](../../assets/erd.png?raw=true)

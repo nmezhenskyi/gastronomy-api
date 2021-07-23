@@ -5,8 +5,17 @@ import { RefreshToken } from '../models/refresh-token'
 import { ServiceResponse } from './service-response'
 import { UserService } from './user-service'
 
+/**
+ * Manages (generates, validates, persists) access and refresh Json Web Tokens.
+ */
 export const TokenService = {
-   generateTokens(payload: any) {
+   /**
+    * Generates a pair of access and refresh tokens.
+    * 
+    * @param payload Object with payload for the JWT
+    * @returns Object with access and refresh tokens
+    */
+   generateTokens(payload: object) {
       const accessToken = jwt.sign(payload, config.get('secrets.jwt-access-secret'), {
          issuer: 'gastronomy-api',
          expiresIn: '15m'
@@ -22,6 +31,12 @@ export const TokenService = {
       }
    },
 
+   /**
+    * Validates access token.
+    * 
+    * @param token JWT
+    * @returns JWT's payload if token is valid, null otherwise.
+    */
    validateAccessToken(token: string) {
       try {
          const userData = jwt.verify(token, config.get('secrets.jwt-access-secret'))
@@ -33,6 +48,12 @@ export const TokenService = {
       }
    },
 
+   /**
+    * Validates refresh token.
+    * 
+    * @param token JWT
+    * @returns JWT's payload if token is valid, null otherwise.
+    */
    validateRefreshToken(token: string) {
       try {
          const userData = jwt.verify(token, config.get('secrets.jwt-refresh-secret'))
@@ -44,6 +65,13 @@ export const TokenService = {
       }
    },
 
+   /**
+    * Saves user's refresh token to the database.
+    * 
+    * @param userId User's id
+    * @param refreshToken User's refresh token
+    * @returns ServiceResponse object with the saved token, if query was successful.
+    */
    async saveRefreshToken(userId: string, refreshToken: string): Promise<ServiceResponse<RefreshToken>> {
       try {
          const repository = getRepository(RefreshToken)
@@ -83,6 +111,12 @@ export const TokenService = {
       }
    },
 
+   /**
+    * Removes user's refresh token from the database.
+    * 
+    * @param refreshToken User's refresh token
+    * @returns ServiceResponse object.
+    */
    async removeRefreshToken(refreshToken: string): Promise<ServiceResponse<null>> {
       try {
          const repository = getRepository(RefreshToken)
@@ -104,6 +138,12 @@ export const TokenService = {
       }
    },
 
+   /**
+    * Finds refresh token in the database.
+    * 
+    * @param refreshToken User's refresh token
+    * @returns ServiceResponse object with the found token, if the query was successful.
+    */
    async findRefreshToken(refreshToken: string): Promise<ServiceResponse<RefreshToken>> {
       try {
          const repository = getRepository(RefreshToken)

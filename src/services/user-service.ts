@@ -2,6 +2,18 @@ import { getRepository } from 'typeorm'
 import bcrypt from 'bcrypt'
 import { User } from '../models/user'
 import { ServiceResponse } from './service-response'
+import { TokenService } from './token-service'
+
+interface UserWithTokenPair {
+   user: User,
+   accessToken: string,
+   refreshToken: string
+}
+
+interface TokenPair {
+   accessToken: string,
+   refreshToken: string
+}
 
 export const UserService = {
    async find(searchBy?: { location?: string }, offset = 0, limit = 10): Promise<ServiceResponse<User[]>> {
@@ -104,6 +116,64 @@ export const UserService = {
       }
       catch (err) {
          return { success: false, message: 'FAILED' }
+      }
+   },
+
+   async register(userDto: {
+      email: string,
+      password: string,
+      name: string
+   }): Promise<ServiceResponse<UserWithTokenPair>> {
+      const user = await this.create(userDto)
+
+      if (user.message === 'INVALID_DATA') return { success: false, message: 'INVALID_DATA' }
+      if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
+
+      const tokenPair = TokenService.generateTokens({ user: { id: user.body.id } })
+      await TokenService.saveRefreshToken(user.body.id, tokenPair.refreshToken)
+
+      return {
+         success: true,
+         message: 'CREATED',
+         body: {
+            ...tokenPair,
+            user: user.body
+         }
+      }
+   },
+
+   async login(email: string, password: string): Promise<ServiceResponse<TokenPair>> {
+      const user = await this.findByCredentials(email, password)
+
+      if (user.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
+      if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
+
+      const tokenPair = TokenService.generateTokens({ user: { id: user.body.id } })
+      await TokenService.saveRefreshToken(user.body.id, tokenPair.refreshToken)
+
+      return {
+         success: true,
+         message: 'FOUND',
+         body: tokenPair
+      }
+   },
+
+   // async refresh(refreshToken: string): Promise<ServiceResponse<TokenPair>> {
+   //    const userPayload = TokenService.validateRefreshToken(refreshToken)
+   //    const tokenFromDb = await TokenService.findRefreshToken(refreshToken)
+
+      
+   // },
+
+   async logout(refreshToken: string): Promise<ServiceResponse<null>> {
+      const result = await TokenService.removeRefreshToken(refreshToken)
+
+      if (result.message === 'FAILED') return { success: false, message: 'FAILED' }
+
+      return {
+         success: true,
+         message: 'REMOVED',
+         body: null
       }
    },
 

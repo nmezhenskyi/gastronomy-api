@@ -2,6 +2,12 @@ import express from 'express'
 
 const router = express.Router()
 
+/**
+ * Root route of the API.
+ * 
+ * @route   GET /
+ * @access  Public
+ */
 router.get('/', (_, res) => {
    const rootDocument = {
       documentation: 'https://github.com/nmezhenskyi/gastronomy-api',

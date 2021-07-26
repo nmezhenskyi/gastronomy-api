@@ -6,19 +6,21 @@ import { TokenService } from '../services/token-service'
  * Middleware for securing routes.
  * Authenticates user by validating JWT in the Authorization header.
  */
-export const authenticateUser = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
    const authorizationHeader = req.headers.authorization
    if (!authorizationHeader) return res.status(401).json({ message: 'Error: Not Authorized' })
 
    const accessToken = authorizationHeader.replace('Bearer ', '')
    if (!accessToken) return res.status(401).json({ message: 'Error: Not Authorized' })
 
-   const userData = TokenService.validateAccessToken(accessToken)
+   const payload = TokenService.validateAccessToken(accessToken)
 
-   if (!userData || typeof userData !== 'object')
-      return res.status(401).json({ message: 'Error: Not Authorized' })
-      
-   req.user = { id: userData.id }
+   if (!payload) return res.status(401).json({ message: 'Error: Not Authorized' })
+
+   if (payload.user)
+      req.user = { id: payload.id }
+   else if (payload.member)
+      req.member = { id: payload.id, role: payload.role  }
    
    return next()
 }

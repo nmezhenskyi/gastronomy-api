@@ -1,9 +1,10 @@
-import jwt from 'jsonwebtoken'
+import jwt, { JwtPayload } from 'jsonwebtoken'
 import config from 'config'
 import { getRepository } from 'typeorm'
 import { RefreshToken } from '../models/refresh-token'
 import { ServiceResponse } from './service-response'
 import { UserService } from './user-service'
+import { TokenPair } from '../common/types'
 
 /**
  * Manages (generates, validates, persists) access and refresh Json Web Tokens.
@@ -12,10 +13,10 @@ export const TokenService = {
    /**
     * Generates a pair of access and refresh tokens.
     * 
-    * @param payload Object with payload for the JWT
+    * @param payload Payload object for the JWT
     * @returns Object with access and refresh tokens
     */
-   generateTokens(payload: object) {
+   generateTokens(payload: { user: { id: string } } | { member: { id: string, role: string }}): TokenPair {
       const accessToken = jwt.sign(payload, config.get('secrets.jwt-access-secret'), {
          issuer: 'gastronomy-api',
          expiresIn: '15m'
@@ -37,9 +38,11 @@ export const TokenService = {
     * @param token JWT
     * @returns JWT's payload if token is valid, null otherwise.
     */
-   validateAccessToken(token: string) {
+   validateAccessToken(token: string): JwtPayload | null {
       try {
          const userData = jwt.verify(token, config.get('secrets.jwt-access-secret'))
+
+         if (typeof userData !== 'object') return null
 
          return userData
       }
@@ -54,9 +57,11 @@ export const TokenService = {
     * @param token JWT
     * @returns JWT's payload if token is valid, null otherwise.
     */
-   validateRefreshToken(token: string) {
+   validateRefreshToken(token: string): JwtPayload | null {
       try {
          const userData = jwt.verify(token, config.get('secrets.jwt-refresh-secret'))
+
+         if (typeof userData !== 'object') return null
 
          return userData
       }
@@ -72,7 +77,7 @@ export const TokenService = {
     * @param refreshToken User's refresh token
     * @returns ServiceResponse object with the saved token, if query was successful.
     */
-   async saveRefreshToken(userId: string, refreshToken: string): Promise<ServiceResponse<RefreshToken>> {
+   async saveUserToken(userId: string, refreshToken: string): Promise<ServiceResponse<RefreshToken>> {
       try {
          const repository = getRepository(RefreshToken)
 
@@ -117,7 +122,7 @@ export const TokenService = {
     * @param refreshToken User's refresh token
     * @returns ServiceResponse object.
     */
-   async removeRefreshToken(refreshToken: string): Promise<ServiceResponse<null>> {
+   async removeUserToken(refreshToken: string): Promise<ServiceResponse<null>> {
       try {
          const repository = getRepository(RefreshToken)
 

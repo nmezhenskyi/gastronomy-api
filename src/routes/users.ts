@@ -1,8 +1,8 @@
-import express from 'express'
+import express, { Response } from 'express'
 import { body, validationResult } from 'express-validator'
 import { UserService } from '../services/user-service'
-import { TokenService } from '../services/token-service'
-import { authenticateUser } from '../middleware/authenticate-user'
+import { authorize } from '../middleware/authorize'
+import { AuthRequest, Role } from '../common/types'
 
 const router = express.Router()
 
@@ -27,9 +27,10 @@ async (req, res) => {
       password: req.body.password
    })
 
-   if (result.message === 'INVALID_DATA') return res.status(400).json({ message: 'Error: User with this email already exists' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Server Error: Couldn't create user account` })
+   if (result.message === 'INVALID') return res.status(400).json({ message: 'Error: User with this email already exists' })
+   if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: `Server Error: Couldn't create user account` })
 
+   res.cookie('userRefreshToken', result.body.refreshToken, { maxAge: 14 * 24 * 60 * 60 * 1000, httpOnly: true })
    return res.status(200).json(result.body)
 })
 
@@ -39,7 +40,7 @@ async (req, res) => {
  * @route   GET /users
  * @access  Private
  */
-router.get('/', authenticateUser, async (_, res) => {
+router.get('/', authorize(), async (_: AuthRequest, res: Response) => {
    const result = await UserService.find()
 
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Nothing found' })
@@ -64,21 +65,13 @@ async (req, res) => {
    if (!errors.isEmpty())
       return res.status(400).json({ message: 'Error: Invalid data', errors: errors.array() })
 
-   const user = await UserService.findByCredentials(req.body.email, req.body.password)
+   const result = await UserService.login(req.body.email, req.body.password)
 
-   if (user.message === 'NOT_FOUND')
-      return res.status(404).json({ message: 'Error: Invalid Credentials' })
-   if (user.message === 'FAILED' || !user.success || !user.body)
-      return res.status(500).json({ message: `Server Error: Couldn't log in` })
+   if (result.message === 'INVALID') return res.status(400).json({ message: 'Error: User with this email already exists' })
+   if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: `Server Error: Couldn't log in account` })
 
-   const payload = { user: { id: user.body.id } }
-   const tokenPair = TokenService.generateTokens(payload)
-   const refreshTokenData = await TokenService.saveRefreshToken(user.body.id, tokenPair.refreshToken)
-
-   if (refreshTokenData.message === 'FAILED' || !refreshTokenData.body)
-      return res.status(500).json({ message: `Server Error: Couldn't log in` })
-
-   return res.status(200).json(tokenPair)
+   res.cookie('userRefreshToken', result.body.refreshToken, { maxAge: 14 * 24 * 60 * 60 * 1000, httpOnly: true })
+   return res.status(200).json(result.body)
 })
 
 export default router

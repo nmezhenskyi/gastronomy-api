@@ -8,6 +8,6 @@
  */
 export interface ServiceResponse<T> {
    success: boolean,
-   message: 'FOUND' | 'NOT_FOUND' | 'CREATED' | 'UPDATED' | 'REMOVED' | 'INVALID_DATA' | 'FAILED',
+   message: 'FOUND' | 'NOT_FOUND' | 'CREATED' | 'UPDATED' | 'REMOVED' | 'VALID' | 'INVALID' | 'FAILED',
    body?: T
 }

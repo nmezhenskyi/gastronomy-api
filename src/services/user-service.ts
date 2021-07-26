@@ -3,14 +3,10 @@ import bcrypt from 'bcrypt'
 import { User } from '../models/user'
 import { ServiceResponse } from './service-response'
 import { TokenService } from './token-service'
+import { TokenPair } from '../common/types'
 
 interface UserWithTokenPair {
    user: User,
-   accessToken: string,
-   refreshToken: string
-}
-
-interface TokenPair {
    accessToken: string,
    refreshToken: string
 }
@@ -67,10 +63,7 @@ export const UserService = {
       try {
          const repository = getRepository(User)
 
-         const user = await repository.findOne({
-            select: ['id', 'email', 'name', 'location'],
-            where: { email }
-         })
+         const user = await repository.findOne({ where: { email } })
 
          if (!user) return { success: false, message: 'NOT_FOUND' }
 
@@ -81,7 +74,7 @@ export const UserService = {
          return {
             success: true,
             message: 'FOUND',
-            body: user
+            body: { ...user, password: '' }
          }
       }
       catch (err) {
@@ -99,7 +92,7 @@ export const UserService = {
 
          const found = await repository.findOne({ email: userDto.email })
 
-         if (found) return { success: false, message: 'INVALID_DATA' }
+         if (found) return { success: false, message: 'INVALID' }
 
          const user = new User()
          user.email = userDto.email
@@ -126,11 +119,11 @@ export const UserService = {
    }): Promise<ServiceResponse<UserWithTokenPair>> {
       const user = await this.create(userDto)
 
-      if (user.message === 'INVALID_DATA') return { success: false, message: 'INVALID_DATA' }
+      if (user.message === 'INVALID') return { success: false, message: 'INVALID' }
       if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
 
       const tokenPair = TokenService.generateTokens({ user: { id: user.body.id } })
-      await TokenService.saveRefreshToken(user.body.id, tokenPair.refreshToken)
+      await TokenService.saveUserToken(user.body.id, tokenPair.refreshToken)
 
       return {
          success: true,
@@ -149,7 +142,7 @@ export const UserService = {
       if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
 
       const tokenPair = TokenService.generateTokens({ user: { id: user.body.id } })
-      await TokenService.saveRefreshToken(user.body.id, tokenPair.refreshToken)
+      await TokenService.saveUserToken(user.body.id, tokenPair.refreshToken)
 
       return {
          success: true,
@@ -158,15 +151,33 @@ export const UserService = {
       }
    },
 
-   // async refresh(refreshToken: string): Promise<ServiceResponse<TokenPair>> {
-   //    const userPayload = TokenService.validateRefreshToken(refreshToken)
-   //    const tokenFromDb = await TokenService.findRefreshToken(refreshToken)
+   async refresh(refreshToken: string): Promise<ServiceResponse<TokenPair>> {
+      try {
+         const userPayload = TokenService.validateRefreshToken(refreshToken)
+         const tokenFromDb = await TokenService.findRefreshToken(refreshToken)
 
-      
-   // },
+         if (!userPayload || !tokenFromDb.success) return { success: false, message: 'FAILED' }
+
+         const repository = getRepository(User)
+         const user = await repository.findOne(userPayload.id)
+         if (!user) return { success: false, message: 'FAILED' }
+
+         const tokenPair = TokenService.generateTokens({ user: { id: user.id } })
+         await TokenService.saveUserToken(user.id, tokenPair.refreshToken)
+
+         return {
+            success: true,
+            message: 'UPDATED',
+            body: tokenPair
+         }
+      }
+      catch (err) {
+         return { success: false, message: 'FAILED' }
+      }
+   },
 
    async logout(refreshToken: string): Promise<ServiceResponse<null>> {
-      const result = await TokenService.removeRefreshToken(refreshToken)
+      const result = await TokenService.removeUserToken(refreshToken)
 
       if (result.message === 'FAILED') return { success: false, message: 'FAILED' }
 

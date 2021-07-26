@@ -5,10 +5,11 @@ import {
    CreateDateColumn,
    UpdateDateColumn
 } from 'typeorm'
+import { Role } from '../common/types'
 
-export enum MemberRole {
-   SUPERVISOR = 'Supervisor',
-   CREATOR = 'Creator'
+enum MemberRole {
+   SUPERVISOR = Role.SUPERVISOR,
+   CREATOR = Role.CREATOR
 }
 
 @Entity()

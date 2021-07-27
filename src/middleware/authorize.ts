@@ -36,7 +36,7 @@ export const authorize = (roles: Role | Role[] = []) => {
                }
             })
 
-            if (!authorized) return res.status(401).json({ message: 'Error: Not Authorized' })
+            if (!authorized) return res.status(403).json({ message: 'Forbidden' })
          }
       
          return next()

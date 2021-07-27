@@ -8,14 +8,14 @@ import { TokenService } from '../services/token-service'
  */
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
    const authorizationHeader = req.headers.authorization
-   if (!authorizationHeader) return res.status(401).json({ message: 'Error: Not Authorized' })
+   if (!authorizationHeader) return res.status(401).json({ message: 'Not Authorized' })
 
    const accessToken = authorizationHeader.replace('Bearer ', '')
-   if (!accessToken) return res.status(401).json({ message: 'Error: Not Authorized' })
+   if (!accessToken) return res.status(401).json({ message: 'Not Authorized' })
 
    const payload = TokenService.validateAccessToken(accessToken)
 
-   if (!payload) return res.status(401).json({ message: 'Error: Not Authorized' })
+   if (!payload) return res.status(401).json({ message: 'Not Authorized' })
 
    if (payload.user)
       req.user = { id: payload.user.id }

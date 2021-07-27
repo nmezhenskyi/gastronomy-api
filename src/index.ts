@@ -1,6 +1,7 @@
 import 'reflect-metadata'
 import express from 'express'
 import config from 'config'
+import cookieParser from 'cookie-parser'
 import { createConnection, ConnectionOptions } from 'typeorm'
 import { PORT, PROD } from './common/constants'
 import rootRoute from './routes/root'
@@ -26,6 +27,7 @@ const start = async () => {
       } as ConnectionOptions)
 
       app.use(express.json({ extended: false } as Parameters<typeof express.json>[0]))
+      app.use(cookieParser())
       
       // Routes:
       app.use('/', rootRoute)

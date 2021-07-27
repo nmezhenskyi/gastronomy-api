@@ -57,9 +57,21 @@ async (req, res) => {
    return res.status(200).json(result.body)
 })
 
-// router.get('/logout', async (req, res) => {
-//    const result = await UserService.logout()
-// })
+/**
+ * Log out as a user.
+ * 
+ * @route   GET /user/logout
+ * @access  Public
+ */
+router.get('/logout', async (req, res) => {
+   if (!req.cookies?.userRefreshToken) return res.status(400).send()
+
+   const { userRefreshToken } = req.cookies
+   await UserService.logout(userRefreshToken)
+   res.clearCookie('userRefreshToken')
+
+   return res.status(200).send()
+})
 
 /**
  * Find user's information.
@@ -67,7 +79,7 @@ async (req, res) => {
  * @route   GET /user/profile
  * @access  Private (User)
  */
- router.get('/', authorize([Role.USER]), async (req: AuthRequest, res: Response) => {
+ router.get('/profile', authorize([Role.USER]), async (req: AuthRequest, res: Response) => {
    if (!req.user) return res.status(404).json({ message: 'Error: User not found' })
 
    const result = await UserService.findOne({ id: req.user.id })

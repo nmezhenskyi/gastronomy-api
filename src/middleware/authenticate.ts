@@ -18,9 +18,9 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
    if (!payload) return res.status(401).json({ message: 'Error: Not Authorized' })
 
    if (payload.user)
-      req.user = { id: payload.id }
+      req.user = { id: payload.user.id }
    else if (payload.member)
-      req.member = { id: payload.id, role: payload.role  }
+      req.member = { id: payload.member.id, role: payload.member.role  }
    
    return next()
 }

@@ -2,6 +2,7 @@ import 'reflect-metadata'
 import express from 'express'
 import config from 'config'
 import cookieParser from 'cookie-parser'
+import cors from 'cors'
 import { createConnection, ConnectionOptions } from 'typeorm'
 import { PORT, PROD } from './common/constants'
 import rootRoute from './routes/root'
@@ -28,6 +29,7 @@ const start = async () => {
 
       app.use(express.json({ extended: false } as Parameters<typeof express.json>[0]))
       app.use(cookieParser())
+      app.use(cors({ credentials: true, origin: config.get('client.url') }))
       
       // Routes:
       app.use('/', rootRoute)

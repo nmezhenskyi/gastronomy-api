@@ -1,17 +1,23 @@
 title = "API Config"
+documentation = "https://github.com/nmezhenskyi/gastronomy-api"
+
+[environment]
+host = "localhost"
+port = "3000"
+secure = false
 
 [database]
-type="postgres"
-host="localhost"
-port="5432"
-username="pg-user"
-password="pg-user"
-database-name="gastronomy"
+type = "postgres"
+host = "localhost"
+port = "5432"
+username = "pg-user"
+password = "pg-user"
+database-name = "gastronomy"
 
 [typeorm]
-entities=[ "dist/models/*.js" ]
-migrations=[ "dist/migrations/*.js" ]
+entities = [ "dist/models/*.js" ]
+migrations = [ "dist/migrations/*.js" ]
 
 [secrets]
-jwt-access-secret="p7kxjCY598ZiYHM5mNtU4rXs1iftsoh_kHpn7ievzW_T6HBQSv1pS3OEyzK_QQSW9qE8oCAdzWR7doBMy5I2Dw"
-jwt-refresh-secret="kdZ_qwfk_iWdeC68ppHqGcmMqJsnD8WlDcy2XchLzcRXCTcAFOyQfpmbiubQxWfkFpf3wfgbigutG6bWSRc1Bw"
+jwt-access-secret = "p7kxjCY598ZiYHM5mNtU4rXs1iftsoh_kHpn7ievzW_T6HBQSv1pS3OEyzK_QQSW9qE8oCAdzWR7doBMy5I2Dw"
+jwt-refresh-secret = "kdZ_qwfk_iWdeC68ppHqGcmMqJsnD8WlDcy2XchLzcRXCTcAFOyQfpmbiubQxWfkFpf3wfgbigutG6bWSRc1Bw"

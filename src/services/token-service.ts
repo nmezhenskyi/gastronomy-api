@@ -88,6 +88,13 @@ export const TokenService = {
          if (user.message === 'NOT_FOUND' || user.message === 'FAILED' || !user.body)
             return { success: false, message: 'FAILED'}
 
+         // Limit user to 10 refresh tokens
+         const count = await repository.count({ where: { userId: user.body.id } })
+         if (count >= 10) {
+            const oldestToken = await repository.findOne({ where: { userId: user.body.id }, order: { createdAt: 'ASC' } })
+            if (oldestToken) await repository.remove(oldestToken)
+         }
+
          const newToken = new UserRefreshToken()
          newToken.user = user.body
          newToken.token = refreshToken
@@ -101,8 +108,6 @@ export const TokenService = {
             date.setDate(date.getDate() + 14)
             newToken.expiryDate = date
          }
-
-         // TODO: limit number of refresh tokens for each user
 
          const saved = await repository.save(newToken)
 

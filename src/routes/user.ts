@@ -7,9 +7,9 @@ import { AuthRequest, Role } from '../common/types'
 const router = express.Router()
 
 /**
- * Registers new user account.
+ * Register new user account.
  * 
- * @route   POST /users
+ * @route   POST /user/register
  * @access  Public
  */
 router.post('/',
@@ -35,26 +35,9 @@ async (req, res) => {
 })
 
 /**
- * Finds user accounts.
- * 
- * @route   GET /users
- * @access  Private
- */
-router.get('/', authorize(), async (_: AuthRequest, res: Response) => {
-   const result = await UserService.find()
-
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Nothing found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server Error: Query failed' })
-   
-   return res.status(200).json(result.body)
-})
-
-// Authentication:
-
-/**
  * Log in as a user.
  * 
- * @route   POST /users/login
+ * @route   POST /user/login
  * @access  Public
  */
 router.post('/login',
@@ -71,6 +54,27 @@ async (req, res) => {
    if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: `Server Error: Couldn't log in account` })
 
    res.cookie('userRefreshToken', result.body.refreshToken, { maxAge: 14 * 24 * 60 * 60 * 1000, httpOnly: true })
+   return res.status(200).json(result.body)
+})
+
+// router.get('/logout', async (req, res) => {
+//    const result = await UserService.logout()
+// })
+
+/**
+ * Find user's information.
+ * 
+ * @route   GET /user/profile
+ * @access  Private (User)
+ */
+ router.get('/', authorize([Role.USER]), async (req: AuthRequest, res: Response) => {
+   if (!req.user) return res.status(404).json({ message: 'Error: User not found' })
+
+   const result = await UserService.findOne({ id: req.user.id })
+
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: User not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server Error: Query failed' })
+   
    return res.status(200).json(result.body)
 })
 

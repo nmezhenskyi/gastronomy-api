@@ -6,7 +6,7 @@ import { PORT, PROD } from './common/constants'
 import rootRoute from './routes/root'
 import ingredientsRoute from './routes/ingredients'
 import cocktailsRoute from './routes/cocktails'
-import usersRoute from './routes/users'
+import userRoute from './routes/user'
 
 const app = express()
 
@@ -31,7 +31,7 @@ const start = async () => {
       app.use('/', rootRoute)
       app.use('/ingredients', ingredientsRoute)
       app.use('/cocktails', cocktailsRoute)
-      app.use('/users', usersRoute)
+      app.use('/user', userRoute)
 
       app.listen(PORT, () => console.log(`Server started on port ${PORT}`))
    }

@@ -1,4 +1,6 @@
 import express from 'express'
+import config from 'config'
+import { API_URL } from '../common/constants'
 
 const router = express.Router()
 
@@ -10,26 +12,38 @@ const router = express.Router()
  */
 router.get('/', (_, res) => {
    const rootDocument = {
-      documentation: 'https://github.com/nmezhenskyi/gastronomy-api',
+      documentation: config.get('documentation'),
       links: [
          {
             rel: 'cocktail',
-            href: 'http://localhost:3000/cocktails',
+            href: `${API_URL}/cocktails`,
             action: 'GET',
             description: 'Find cocktail recipes'
          },
          {
             rel: 'meal',
-            href: 'http://localhost:3000/meals',
+            href: `${API_URL}/meals`,
             action: 'GET',
             description: 'Find meal recipes'
          },
          {
             rel: 'ingredient',
-            href: 'http://localhost:3000/ingredients',
+            href: `${API_URL}/ingredients`,
             action: 'GET',
             description: 'Find ingredients'
-         }
+         },
+         {
+            rel: 'user',
+            href: `${API_URL}/users`,
+            action: 'POST',
+            description: 'Register user account'
+         },
+         {
+            rel: 'user',
+            href: `${API_URL}/users/login`,
+            action: 'POST',
+            description: 'Log in as user'
+         },
       ]
    }
 

@@ -9,14 +9,20 @@ import {
 import { User } from './user'
 
 @Entity()
-export class RefreshToken {
+export class UserRefreshToken {
    @PrimaryGeneratedColumn('uuid')
    id!: string
 
    @Column({ unique: true })
    token!: string
 
-   @ManyToOne(() => User)
+   @Column()
+   userId!: string
+
+   @Column('timestamp')
+   expiryDate!: Date
+
+   @ManyToOne(() => User, { onDelete: 'CASCADE' })
    user!: User
 
    @CreateDateColumn()

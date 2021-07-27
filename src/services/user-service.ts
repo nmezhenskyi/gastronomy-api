@@ -154,9 +154,11 @@ export const UserService = {
    async refresh(refreshToken: string): Promise<ServiceResponse<TokenPair>> {
       try {
          const userPayload = TokenService.validateRefreshToken(refreshToken)
-         const tokenFromDb = await TokenService.findRefreshToken(refreshToken)
+         const tokenFromDb = await TokenService.findUserRefreshToken(refreshToken)
 
          if (!userPayload || !tokenFromDb.success) return { success: false, message: 'FAILED' }
+
+         await TokenService.removeUserToken(refreshToken)
 
          const repository = getRepository(User)
          const user = await repository.findOne(userPayload.id)

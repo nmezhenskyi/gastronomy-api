@@ -1,7 +1,7 @@
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import config from 'config'
 import { getRepository } from 'typeorm'
-import { RefreshToken } from '../models/refresh-token'
+import { UserRefreshToken } from '../models/user-refresh-token'
 import { ServiceResponse } from './service-response'
 import { UserService } from './user-service'
 import { TokenPair } from '../common/types'
@@ -77,31 +77,30 @@ export const TokenService = {
     * @param refreshToken User's refresh token
     * @returns ServiceResponse object with the saved token, if query was successful.
     */
-   async saveUserToken(userId: string, refreshToken: string): Promise<ServiceResponse<RefreshToken>> {
+   async saveUserToken(userId: string, refreshToken: string): Promise<ServiceResponse<UserRefreshToken>> {
       try {
-         const repository = getRepository(RefreshToken)
+         const payload = this.validateRefreshToken(refreshToken)
+         if (!payload) return { success: false, message: 'INVALID' }
 
-         const tokenRecord = await repository.findOne({ where: { userId }})
-
-         if (tokenRecord) {
-            tokenRecord.token = refreshToken
-            const saved = await repository.save(tokenRecord)
-
-            return {
-               success: true,
-               message: 'UPDATED',
-               body: saved
-            }
-         }
-
+         const repository = getRepository(UserRefreshToken)
          const user = await UserService.findOne({ id: userId })
 
          if (user.message === 'NOT_FOUND' || user.message === 'FAILED' || !user.body)
             return { success: false, message: 'FAILED'}
 
-         const newToken = new RefreshToken()
+         const newToken = new UserRefreshToken()
          newToken.user = user.body
          newToken.token = refreshToken
+         if (payload.exp) {
+            newToken.expiryDate = new Date(payload.exp)
+         }
+         else {
+            const date = new Date()
+            date.setDate(date.getDate() + 14)
+            newToken.expiryDate = date
+         }
+
+         // TODO: limit number of refresh tokens for each user
 
          const saved = await repository.save(newToken)
 
@@ -124,7 +123,7 @@ export const TokenService = {
     */
    async removeUserToken(refreshToken: string): Promise<ServiceResponse<null>> {
       try {
-         const repository = getRepository(RefreshToken)
+         const repository = getRepository(UserRefreshToken)
 
          const tokenRecord = await repository.findOne({ token: refreshToken })
 
@@ -149,9 +148,9 @@ export const TokenService = {
     * @param refreshToken User's refresh token
     * @returns ServiceResponse object with the found token, if the query was successful.
     */
-   async findRefreshToken(refreshToken: string): Promise<ServiceResponse<RefreshToken>> {
+   async findUserRefreshToken(refreshToken: string): Promise<ServiceResponse<UserRefreshToken>> {
       try {
-         const repository = getRepository(RefreshToken)
+         const repository = getRepository(UserRefreshToken)
 
          const tokenRecord = await repository.findOne({ token: refreshToken })
 

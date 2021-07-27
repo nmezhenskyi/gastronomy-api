@@ -92,10 +92,12 @@ export const TokenService = {
          newToken.user = user.body
          newToken.token = refreshToken
          if (payload.exp) {
-            newToken.expiryDate = new Date(payload.exp)
+            const date = new Date(0) // Set date to the start of the Epoch
+            date.setUTCSeconds(payload.exp) // payload.exp returns number of seconds since the Epoch
+            newToken.expiryDate = date
          }
          else {
-            const date = new Date()
+            const date = new Date() // Set date to the current date
             date.setDate(date.getDate() + 14)
             newToken.expiryDate = date
          }
@@ -143,7 +145,7 @@ export const TokenService = {
    },
 
    /**
-    * Finds refresh token in the database.
+    * Finds user refresh token in the database.
     * 
     * @param refreshToken User's refresh token
     * @returns ServiceResponse object with the found token, if the query was successful.

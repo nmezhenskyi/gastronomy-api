@@ -34,15 +34,33 @@ router.get('/', (_, res) => {
          },
          {
             rel: 'user',
-            href: `${API_URL}/users`,
+            href: `${API_URL}/user`,
             action: 'POST',
             description: 'Register user account'
          },
          {
             rel: 'user',
-            href: `${API_URL}/users/login`,
+            href: `${API_URL}/user/login`,
             action: 'POST',
             description: 'Log in as user'
+         },
+         {
+            rel: 'user',
+            href: `${API_URL}/user/refresh`,
+            action: 'GET',
+            description: 'Renew access and refresh tokens'
+         },
+         {
+            rel: 'user',
+            href: `${API_URL}/user/logout`,
+            action: 'GET',
+            description: 'Destroy current refresh token and log out'
+         },
+         {
+            rel: 'user',
+            href: `${API_URL}/user/profile`,
+            action: 'GET',
+            description: 'Access account information as a user'
          },
       ]
    }

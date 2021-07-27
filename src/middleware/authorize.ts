@@ -2,6 +2,11 @@ import { Response, NextFunction } from 'express'
 import { AuthRequest, Role } from '../common/types'
 import { authenticate } from './authenticate'
 
+/**
+ * Middleware for securing routes.
+ * Restricts access to a route based on the provided roles.
+ * Includes ```authenticate``` middleware in the chain.
+ */
 export const authorize = (roles: Role | Role[] = []) => {
    return [
       authenticate,

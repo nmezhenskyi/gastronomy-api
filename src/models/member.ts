@@ -7,7 +7,7 @@ import {
 } from 'typeorm'
 import { Role } from '../common/types'
 
-enum MemberRole {
+export enum MemberRole {
    SUPERVISOR = Role.SUPERVISOR,
    CREATOR = Role.CREATOR
 }

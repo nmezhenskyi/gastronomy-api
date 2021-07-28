@@ -88,9 +88,9 @@ export const TokenService = {
          if (user.message === 'NOT_FOUND' || user.message === 'FAILED' || !user.body)
             return { success: false, message: 'FAILED'}
 
-         // Limit user to 10 refresh tokens
+         // Limit user to 6 refresh tokens
          const count = await repository.count({ where: { userId: user.body.id } })
-         if (count >= 10) {
+         if (count >= 6) {
             const oldestToken = await repository.findOne({ where: { userId: user.body.id }, order: { createdAt: 'ASC' } })
             if (oldestToken) await repository.remove(oldestToken)
          }

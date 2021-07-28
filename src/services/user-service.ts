@@ -12,6 +12,14 @@ interface UserWithTokenPair {
 }
 
 export const UserService = {
+   /**
+    * Finds users in the database that match given conditions.
+    * 
+    * @param searchBy Search condition
+    * @param offset Search offset
+    * @param limit Search limit
+    * @returns ServiceResponse object with array of found users
+    */
    async find(searchBy?: { location?: string }, offset = 0, limit = 10): Promise<ServiceResponse<User[]>> {
       try {
          const repository = getRepository(User)
@@ -37,6 +45,12 @@ export const UserService = {
       }
    },
 
+   /**
+    * Finds one user in the database that matches given conditions.
+    * 
+    * @param searchBy Search condition
+    * @returns ServiceResponse object with found user
+    */
    async findOne(searchBy?: { id?: string, email?: string }): Promise<ServiceResponse<User>> {
       try {
          const repository = getRepository(User)
@@ -59,6 +73,13 @@ export const UserService = {
       }
    },
 
+   /**
+    * Finds user by credetials. If password doesn't match, returns *NOT_FOUND*.
+    * 
+    * @param email Member's email
+    * @param rawPassword Member's password
+    * @returns ServiceResponse object with found member
+    */
    async findByCredentials(email: string, rawPassword: string): Promise<ServiceResponse<User>> {
       try {
          const repository = getRepository(User)
@@ -82,6 +103,12 @@ export const UserService = {
       }
    },
 
+   /**
+    * Adds the member to the database.
+    * 
+    * @param userDto Information about new user account
+    * @returns ServiceResponse object with created user
+    */
    async create(userDto: {
       email: string,
       password: string,

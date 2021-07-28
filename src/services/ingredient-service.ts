@@ -7,7 +7,9 @@ export const IngredientService = {
     * Finds ingredients in the database that match given conditions.
     * 
     * @param searchBy Search condition
-    * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with array of found ingredients.
+    * @param offest Search offset
+    * @param limit Search limit
+    * @returns ServiceResponse object with array of found ingredients
     */
    async find(searchBy?: { category?: string  }, offset = 0, limit = 10): Promise<ServiceResponse<Ingredient[]>> {
       try {
@@ -37,7 +39,7 @@ export const IngredientService = {
     * Finds one ingredient in the database that matches given conditions.
     * 
     * @param searchBy Search condition
-    * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with found ingredient object.
+    * @returns ServiceResponse object with found ingredient
     */
    async findOne(searchBy: { id: string, name?: string } | { id?: string, name: string }): Promise<ServiceResponse<Ingredient>> {
       try {
@@ -62,7 +64,7 @@ export const IngredientService = {
     * Saves the ingredient to the database.
     * 
     * @param ingredientDto New ingredient object
-    * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with created ingredient object.
+    * @returns ServiceResponse object with created ingredient
     */
    async create(ingredientDto: { category: string, name: string, description?: string }): Promise<ServiceResponse<Ingredient>> {
       try {
@@ -90,7 +92,7 @@ export const IngredientService = {
     * Updates the ingredient in the database.
     * 
     * @param ingredientDto Updated ingredient object
-    * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery with updated ingredient object.
+    * @returns ServiceResponse object with updated ingredient
     */
    async update(ingredientDto: { id: string, category?: string, name?: string, description?: string }): Promise<ServiceResponse<Ingredient>> {
       try {
@@ -121,7 +123,7 @@ export const IngredientService = {
     * Removes specified ingredient from the database.
     * 
     * @param id id of the ingredient to be removed
-    * @returns ServiceResponse object with 'success' property.
+    * @returns ServiceResponse object
     */
    async remove(id: string): Promise<ServiceResponse<null>> {
       try {

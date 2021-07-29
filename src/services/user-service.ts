@@ -139,6 +139,12 @@ export const UserService = {
       }
    },
 
+   /**
+    * Registers a new user account by invoking ```create``` method and issuing access and refresh tokens for the user.
+    * 
+    * @param userDto Information about new user account
+    * @returns ServiceResponse object with created user and a token pair
+    */
    async register(userDto: {
       email: string,
       password: string,
@@ -150,7 +156,7 @@ export const UserService = {
       if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
 
       const tokenPair = TokenService.generateTokens({ user: { id: user.body.id } })
-      await TokenService.saveUserToken(user.body.id, tokenPair.refreshToken)
+      await TokenService.saveUserRefreshToken(user.body.id, tokenPair.refreshToken)
 
       return {
          success: true,
@@ -162,6 +168,13 @@ export const UserService = {
       }
    },
 
+   /**
+    * Verifies user's credentials and issues a pair of access and refresh tokens.
+    * 
+    * @param email User's email
+    * @param password User's password
+    * @returns ServiceResponse object with an access and refresh tokens pair
+    */
    async login(email: string, password: string): Promise<ServiceResponse<TokenPair>> {
       const user = await this.findByCredentials(email, password)
 
@@ -169,7 +182,7 @@ export const UserService = {
       if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
 
       const tokenPair = TokenService.generateTokens({ user: { id: user.body.id } })
-      await TokenService.saveUserToken(user.body.id, tokenPair.refreshToken)
+      await TokenService.saveUserRefreshToken(user.body.id, tokenPair.refreshToken)
 
       return {
          success: true,
@@ -178,6 +191,12 @@ export const UserService = {
       }
    },
 
+   /**
+    * Uses user's refresh token to issue a new pair of access and refresh tokens.
+    * 
+    * @param refreshToken User's refresh token
+    * @returns ServiceResponse object with a new pair of access and refresh tokens
+    */
    async refresh(refreshToken: string): Promise<ServiceResponse<TokenPair>> {
       try {
          const userPayload = TokenService.validateRefreshToken(refreshToken)
@@ -185,14 +204,14 @@ export const UserService = {
 
          if (!userPayload || !tokenFromDb.success) return { success: false, message: 'FAILED' }
 
-         await TokenService.removeUserToken(refreshToken)
+         await TokenService.removeUserRefreshToken(refreshToken)
 
          const repository = getRepository(User)
          const user = await repository.findOne(userPayload.id)
          if (!user) return { success: false, message: 'FAILED' }
 
          const tokenPair = TokenService.generateTokens({ user: { id: user.id } })
-         await TokenService.saveUserToken(user.id, tokenPair.refreshToken)
+         await TokenService.saveUserRefreshToken(user.id, tokenPair.refreshToken)
 
          return {
             success: true,
@@ -205,8 +224,14 @@ export const UserService = {
       }
    },
 
+   /**
+    * Revokes user's refresh token.
+    * 
+    * @param refreshToken User's refresh token
+    * @returns ServiceResponse object
+    */
    async logout(refreshToken: string): Promise<ServiceResponse<null>> {
-      const result = await TokenService.removeUserToken(refreshToken)
+      const result = await TokenService.removeUserRefreshToken(refreshToken)
 
       if (result.message === 'FAILED') return { success: false, message: 'FAILED' }
 
@@ -217,6 +242,12 @@ export const UserService = {
       }
    },
 
+   /**
+    * Updates the user in the database.
+    * 
+    * @param userDto Updated user information
+    * @returns ServiceResponse object with updated member
+    */
    async update(userDto: {
       id: string,
       email?: string,
@@ -251,6 +282,12 @@ export const UserService = {
       }
    },
 
+   /**
+    * Removes specified user account from the database.
+    * 
+    * @param id User's id
+    * @returns ServiceResponse object
+    */
    async remove(id: string): Promise<ServiceResponse<null>> {
       try {
          const repository = getRepository(User)

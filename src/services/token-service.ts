@@ -9,7 +9,7 @@ import { MemberRefreshToken } from 'models/member-refresh-token'
 import { TokenPair } from '../common/types'
 
 /**
- * Manages (generates, validates, persists) access and refresh Json Web Tokens.
+ * Manages access and refresh Json Web Tokens.
  */
 export const TokenService = {
    /**
@@ -21,7 +21,7 @@ export const TokenService = {
    generateTokens(payload: { user: { id: string } } | { member: { id: string, role: string }}): TokenPair {
       const accessToken = jwt.sign(payload, config.get('secrets.jwt-access-secret'), {
          issuer: 'gastronomy-api',
-         expiresIn: '15m'
+         expiresIn: '30m'
       })
       const refreshToken = jwt.sign(payload, config.get('secrets.jwt-refresh-secret'), {
          issuer: 'gastronomy-api',
@@ -32,6 +32,21 @@ export const TokenService = {
          accessToken,
          refreshToken
       }
+   },
+
+   /**
+    * Generates access token.
+    * 
+    * @param payload Payload object for the JWT
+    * @returns String with access token
+    */
+   generateAccessToken(payload: { user: { id: string } } | { member: { id: string, role: string }}): string {
+      const accessToken = jwt.sign(payload, config.get('secrets.jwt-access-secret'), {
+         issuer: 'gastronomy-api',
+         expiresIn: '30m'
+      })
+
+      return accessToken
    },
 
    /**
@@ -71,8 +86,6 @@ export const TokenService = {
          return null
       }
    },
-
-   // UserRefreshToken:
 
    /**
     * Saves user's refresh token to the database.
@@ -177,8 +190,6 @@ export const TokenService = {
          return { success: false, message: 'FAILED' }
       }
    },
-
-   // MemberRefreshToken:
 
    /**
     * Saves member's refresh token to the database.

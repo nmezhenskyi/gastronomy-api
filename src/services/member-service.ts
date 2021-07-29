@@ -2,6 +2,7 @@ import { getRepository } from 'typeorm'
 import bcrypt from 'bcrypt'
 import { Member, MemberRole } from '../models/member'
 import { ServiceResponse } from './service-response'
+import { TokenService } from './token-service'
 
 export const MemberService = {
    /**
@@ -110,7 +111,7 @@ export const MemberService = {
       password: string,
       firstName: string,
       lastName: string,
-      supervisor: boolean
+      role: MemberRole
    }): Promise<ServiceResponse<Member>> {
       try {
          const repository = getRepository(Member)
@@ -124,7 +125,7 @@ export const MemberService = {
          member.password = await bcrypt.hash(memberDto.password, 10)
          member.firstName = memberDto.firstName
          member.lastName = memberDto.lastName
-         member.role = memberDto.supervisor ? MemberRole.SUPERVISOR : MemberRole.CREATOR
+         member.role = memberDto.role
 
          const saved = await repository.save(member)
 
@@ -137,5 +138,94 @@ export const MemberService = {
       catch (err) {
          return { success: false, message: 'FAILED' }
       }
-   }   
+   },
+
+   /**
+    * Verifies member's credentials and issues an access token.
+    * 
+    * @param email Member's email
+    * @param password Member's password
+    * @returns ServiceResponse object with access token string
+    */
+   async login(email: string, password: string): Promise<ServiceResponse<string>> {
+      const member = await this.findByCredentials(email, password)
+
+      if (member.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
+      if (member.message === 'FAILED' || !member.body) return { success: false, message: 'FAILED' }
+
+      const { accessToken } = TokenService.generateTokens({ member: { id: member.body.id, role: member.body.role.toString() } })
+
+      return {
+         success: true,
+         message: 'FOUND',
+         body: accessToken
+      }
+   },
+
+   /**
+    * Updates the member in the database.
+    * 
+    * @param memberDto Updated member information
+    * @returns ServiceResponse object with updated member
+    */
+   async update(memberDto: {
+      id: string,
+      email?: string,
+      password?: string,
+      firstName?: string,
+      lastName?: string,
+      role?: MemberRole
+   }): Promise<ServiceResponse<Member>> {
+      try {
+         const repository = getRepository(Member)
+
+         const member = await repository.findOne(memberDto.id)
+
+         if (!member) return { success: false, message: 'NOT_FOUND' }
+
+         if (memberDto.email) member.email = memberDto.email
+         if (memberDto.password) member.password = await bcrypt.hash(memberDto.password, 10)
+         if (memberDto.firstName) member.firstName = memberDto.firstName
+         if (memberDto.lastName) member.lastName = memberDto.lastName
+         if (memberDto.role) member.role = memberDto.role
+
+         const saved = await repository.save(member)
+
+         return {
+            success: true,
+            message: 'UPDATED',
+            body: { ...saved, password: '' }
+         }
+      }
+      catch (err) {
+         return { success: false, message: 'FAILED' }
+      }
+   },
+
+   /**
+    * Removes specified member account from the database.
+    * 
+    * @param id Member's id
+    * @returns ServiceResponse object
+    */
+   async remove(id: string): Promise<ServiceResponse<null>> {
+      try {
+         const repository = getRepository(Member)
+
+         const user = await repository.findOne(id)
+
+         if (!user) return { success: false, message: 'NOT_FOUND' }
+
+         await repository.remove(user)
+
+         return {
+            success: true,
+            message: 'REMOVED',
+            body: null
+         }
+      }
+      catch (err) {
+         return { success: false, message: 'FAILED' }
+      }
+   }
 }

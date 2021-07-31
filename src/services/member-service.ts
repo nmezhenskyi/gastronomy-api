@@ -111,7 +111,7 @@ export const MemberService = {
       password: string,
       firstName: string,
       lastName: string,
-      role: MemberRole
+      role: 'Creator' | 'Supervisor'
    }): Promise<ServiceResponse<Member>> {
       try {
          const repository = getRepository(Member)
@@ -125,7 +125,8 @@ export const MemberService = {
          member.password = await bcrypt.hash(memberDto.password, 10)
          member.firstName = memberDto.firstName
          member.lastName = memberDto.lastName
-         member.role = memberDto.role
+         if (memberDto.role === 'Creator') member.role = MemberRole.CREATOR
+         else if (memberDto.role === 'Supervisor') member.role = MemberRole.SUPERVISOR
 
          const saved = await repository.save(member)
 
@@ -174,7 +175,7 @@ export const MemberService = {
       password?: string,
       firstName?: string,
       lastName?: string,
-      role?: MemberRole
+      role?: 'Creator' | 'Supervisor'
    }): Promise<ServiceResponse<Member>> {
       try {
          const repository = getRepository(Member)
@@ -187,7 +188,10 @@ export const MemberService = {
          if (memberDto.password) member.password = await bcrypt.hash(memberDto.password, 10)
          if (memberDto.firstName) member.firstName = memberDto.firstName
          if (memberDto.lastName) member.lastName = memberDto.lastName
-         if (memberDto.role) member.role = memberDto.role
+         if (memberDto.role) {
+            if (memberDto.role === 'Creator') member.role = MemberRole.CREATOR
+            else if (memberDto.role === 'Supervisor') member.role = MemberRole.SUPERVISOR
+         }
 
          const saved = await repository.save(member)
 

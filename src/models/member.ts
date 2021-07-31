@@ -30,7 +30,7 @@ export class Member {
    })
    email!: string
 
-   @Column({ length: 50 })
+   @Column({ length: 255 })
    password!: string
 
    @Column({

@@ -42,7 +42,7 @@ router.get('/', (_, res) => {
             rel: 'user',
             href: `${API_URL}/user/login`,
             action: 'POST',
-            description: 'Log in as user'
+            description: 'Log in as a user'
          },
          {
             rel: 'user',
@@ -60,7 +60,19 @@ router.get('/', (_, res) => {
             rel: 'user',
             href: `${API_URL}/user/profile`,
             action: 'GET',
-            description: 'Access account information as a user'
+            description: 'Access user account information as a user'
+         },
+         {
+            rel: 'user',
+            href: `${API_URL}/user/profile`,
+            action: 'PUT',
+            description: 'Update user account information as a user'
+         },
+         {
+            rel: 'user',
+            href: `${API_URL}/user/profile`,
+            action: 'DELETE',
+            description: 'Delete account user account as a user'
          },
       ]
    }

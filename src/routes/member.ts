@@ -28,7 +28,7 @@ async (req: AuthRequest, res: Response) => {
       lastName: req.body.lastName,
       email: req.body.email,
       password: req.body.password,
-      role: 'Creator'
+      role: Role.CREATOR
    })
 
    if (result.message === 'INVALID') return res.status(400).json({ message: 'Member with this email already exists' })

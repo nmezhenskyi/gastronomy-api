@@ -115,11 +115,11 @@ router.get('/refresh', async (req, res) => {
  */
 router.put('/profile',
 authorize(Role.USER),
-body('name').isLength({ max: 255 }).trim(),
-body('email').isEmail(),
-body('password').isLength({ min: 6, max: 50 }),
-body('location').isLength({ max: 100 }),
-body('photo').isLength({ max: 255 }),
+body('name').optional().isLength({ max: 255 }).trim(),
+body('email').optional().isEmail(),
+body('password').optional().isLength({ min: 6, max: 50 }),
+body('location').optional().isLength({ max: 100 }),
+body('photo').optional().isLength({ max: 255 }),
 async (req: AuthRequest, res: Response) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())

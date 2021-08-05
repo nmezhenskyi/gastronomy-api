@@ -54,7 +54,7 @@ export const CocktailService = {
                'c.notesOnIngredients', 'c.notesOnExecution', 'c.notesOnTaste'
             ])
             .addSelect(['cti.amount'])
-            .addSelect(['i.id', 'i.name', 'i.type', 'i.description'])
+            .addSelect(['i.id', 'i.name', 'i.category', 'i.description'])
             .where(`${
                (searchBy.id && searchBy.name) ? 'c.id = :id AND c.name = :name' :
                (searchBy.id ? 'c.id = :id' : (searchBy.name ? 'c.name = :name' : ''))

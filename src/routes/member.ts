@@ -16,8 +16,8 @@ router.post('/',
 authorize(Role.SUPERVISOR),
 body('email').notEmpty().isEmail(),
 body('password').notEmpty().isLength({ min: 6, max: 50 }),
-body('firstName').notEmpty().isLength({ max: 50 }),
-body('lastName').notEmpty().isLength({ max: 50 }),
+body('firstName').notEmpty().isLength({ max: 50 }).trim(),
+body('lastName').notEmpty().isLength({ max: 50 }).trim(),
 async (req: AuthRequest, res: Response) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())

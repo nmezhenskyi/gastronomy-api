@@ -50,7 +50,7 @@ async (req, res) => {
 
    const result = await UserService.login(req.body.email, req.body.password)
 
-   if (result.message === 'INVALID') return res.status(400).json({ message: 'User with this email already exists' })
+   if (result.message === 'NOT_FOUND') return res.status(400).json({ message: `Wrong credentials` })
    if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: `Couldn't log in` })
 
    res.cookie('userRefreshToken', result.body.refreshToken, { maxAge: 14 * 24 * 60 * 60 * 1000, httpOnly: true })
@@ -96,7 +96,7 @@ router.get('/refresh', async (req, res) => {
  * @route   GET /user/profile
  * @access  Private (User)
  */
- router.get('/profile', authorize([Role.USER]), async (req: AuthRequest, res: Response) => {
+ router.get('/profile', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
    if (!req.user) return res.status(404).json({ message: 'User not found' })
 
    const result = await UserService.findOne({ id: req.user.id })
@@ -104,6 +104,41 @@ router.get('/refresh', async (req, res) => {
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
    if (result.message === 'FAILED') return res.status(500).json({ message: 'Query failed' })
    
+   return res.status(200).json(result.body)
+})
+
+/**
+ * Update user information.
+ * 
+ * @route   PUT /user/profile
+ * @access  Private (User)
+ */
+router.put('/profile',
+authorize(Role.USER),
+body('name').isLength({ max: 255 }).trim(),
+body('email').isEmail(),
+body('password').isLength({ min: 6, max: 50 }),
+body('location').isLength({ max: 100 }),
+body('photo').isLength({ max: 255 }),
+async (req: AuthRequest, res: Response) => {
+   const errors = validationResult(req)
+   if (!errors.isEmpty())
+      return res.status(400).json({ message: 'Error: Invalid data', errors: errors.array() })
+
+   if (!req.user) return res.status(404).json({ message: 'User not found' })
+
+   const result = await UserService.update({
+      id: req.user.id,
+      name: req.body.name,
+      email: req.body.email,
+      password: req.body.password,
+      location: req.body.location,
+      photo: req.body.photo
+   })
+
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't update user profile` })
+
    return res.status(200).json(result.body)
 })
 

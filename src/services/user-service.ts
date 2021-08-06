@@ -4,6 +4,7 @@ import { User } from '../models/user'
 import { ServiceResponse } from './service-response'
 import { TokenService } from './token-service'
 import { TokenPair } from '../common/types'
+import { CocktailService } from './cocktail-service'
 
 interface UserWithTokenPair {
    user: User,
@@ -56,7 +57,7 @@ export const UserService = {
          const repository = getRepository(User)
 
          const user = await repository.findOne({
-            select: ['id', 'email', 'name', 'location'],
+            select: ['id', 'email', 'name', 'location' ],
             where: searchBy
          })
 
@@ -302,6 +303,98 @@ export const UserService = {
             success: true,
             message: 'REMOVED',
             body: null
+         }
+      }
+      catch (err) {
+         return { success: false, message: 'FAILED' }
+      }
+   },
+
+   /**
+    * Add the cocktail to the user's list of saved cocktails.
+    * 
+    * @param userId User's id
+    * @param cocktailId Cocktail id
+    * @returns ServiceResponse object with updated user account
+    */
+   async saveCocktail(userId: string, cocktailId: string): Promise<ServiceResponse<User>> {
+      try {
+         const userRepository = getRepository(User)
+         const user = await userRepository.findOne(userId)
+         if (!user) return { success: false, message: 'NOT_FOUND' }
+
+         const cocktail = await CocktailService.findOne({ id: cocktailId })
+         if (cocktail.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
+         if (cocktail.message === 'FAILED' || !cocktail.body) return { success: false, message: 'FAILED' }
+
+         if (!user.savedCocktails)
+            user.savedCocktails = [cocktail.body]
+         else
+            user.savedCocktails.push(cocktail.body)
+
+         const saved = await userRepository.save(user)
+
+         return {
+            success: true,
+            message: 'UPDATED',
+            body: saved
+         }
+      }
+      catch (err) {
+         console.error(err)
+         return { success: false, message: 'FAILED' }
+      }
+   },
+
+   /**
+    * Finds cocktails from the user's list of saved cocktails.
+    * 
+    * @param userId User's id
+    * @returns ServiceResponse object
+    */
+   async findSavedCocktails(userId: string): Promise<ServiceResponse<User>> {
+      try {
+         const userRepository = getRepository(User)
+         const user = await userRepository.findOne({ where: { id: userId }, relations: ['savedCocktails']})
+         if (!user) return { success: false, message: 'NOT_FOUND' }
+
+         return {
+            success: true,
+            message: 'FOUND',
+            body: user
+         }
+      }
+      catch (err) {
+         console.error(err)
+         return { success: false, message: 'FAILED' }
+      }
+   },
+
+   /**
+    * Removes the cocktail from the user's list of saved cocktails.
+    * 
+    * @param userId User's id
+    * @param cocktailId Cocktail id
+    * @returns ServiceResponse object with updated user account
+    */
+   async removeCocktail(userId: string, cocktailId: string): Promise<ServiceResponse<User>> {
+      try {
+         const userRepository = getRepository(User)
+         const user = await userRepository.findOne(userId)
+         if (!user) return { success: false, message: 'NOT_FOUND' }
+
+         if (user.savedCocktails && user.savedCocktails.length > 0) {
+            user.savedCocktails = user.savedCocktails.filter(cocktail => {
+               cocktail.id !== cocktailId
+            })
+         }
+
+         const saved = await userRepository.save(user)
+
+         return {
+            success: true,
+            message: 'UPDATED',
+            body: saved
          }
       }
       catch (err) {

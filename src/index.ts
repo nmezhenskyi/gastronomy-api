@@ -16,6 +16,7 @@ const app = express()
 
 const start = async () => {
    try {
+      // Database Connection:
       await createConnection({
          type: config.get('database.type'),
          host: config.get('database.host'),
@@ -29,6 +30,7 @@ const start = async () => {
          logging: !PROD
       } as ConnectionOptions)
 
+      // Server Configuration:
       app.use(express.json({ extended: false } as Parameters<typeof express.json>[0]))
       app.use(cookieParser())
       app.use(cors({ credentials: true, origin: config.get('client.url') }))

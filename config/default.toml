@@ -13,9 +13,9 @@ url = "http://localhost:3000"
 type = "postgres"
 host = "localhost"
 port = "5432"
+database-name = "gastronomy"
 username = "pg-user"
 password = "pg-user"
-database-name = "gastronomy"
 
 [typeorm]
 entities = [ "dist/models/*.js" ]

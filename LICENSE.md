@@ -1,4 +1,4 @@
-Copyright (c) <2021>, <Nikita Mezhenskyi>
+Copyright (c) 2021, Nikita Mezhenskyi
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

@@ -12,8 +12,8 @@ The project is currently in active development stage. There is no stable release
 ## Documentation
 ### Getting Started:
 
-## Author
-[Nikita Mezhenskyi](https://github.com/nmezhenskyi)
-
 ## License
 BSD-3-Clause
+
+## Author
+[Nikita Mezhenskyi](https://github.com/nmezhenskyi)

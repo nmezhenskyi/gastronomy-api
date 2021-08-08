@@ -177,7 +177,7 @@ router.get('/saved/cocktails', authorize(Role.USER), async (req: AuthRequest, re
 })
 
 /**
- * Add cockctail the user's list of saved cocktails.
+ * Add cockctail to the list of saved cocktails.
  * 
  * @route   PUT /user/saved/cocktails
  * @access  Private (User)
@@ -198,6 +198,24 @@ async (req: AuthRequest, res: Response) => {
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Not found' })
 
    return res.status(200).json(result.body)
+})
+
+/**
+ * Remove cocktail from the list of saved cocktails.
+ * 
+ * @route   DELETE /user/saved/cocktails/:cocktailId
+ * @access  Private (User)
+ */
+router.delete('/saved/cocktails/:cocktailId', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
+   if (!req.user) return res.status(404).json({ message: 'User not found' })
+   if (!req.params.cocktailId) return res.status(404).json({ message: 'Cocktail not found' })
+
+   const result = await UserService.removeCocktail(req.user.id, req.params.cocktailId)
+
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to remove cocktail' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail not found' })
+
+   return res.status(200).json({ message: 'Cocktail has been removed from saved cocktails' })
 })
 
 export default router

@@ -10,6 +10,9 @@ interface Supervisor {
    role: string
 }
 
+/**
+ * Saves supervisors from the file to the database.
+ */
 export const setSupervisor = async () => {
    const fileData = await fs.readFile(path.join(__dirname, '../../.deployment/supervisor.json'), 'utf-8')
    const supervisors: Supervisor[] = JSON.parse(fileData)

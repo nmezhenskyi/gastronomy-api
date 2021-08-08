@@ -192,7 +192,7 @@ export const TokenService = {
    /**
     * Removes expired user refresh tokens from the database.
     */
-   async cleanUpExpired(): Promise<void> {
+   async cleanUp(): Promise<void> {
       try {
          const repository = getRepository(UserRefreshToken)
 

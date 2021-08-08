@@ -11,6 +11,7 @@ import cocktailsRoute from './routes/cocktails'
 import userRoute from './routes/user'
 import memberRoute from './routes/member'
 import { handleNotFound } from './middleware/not-found'
+import { cleanUpExpiredSessions } from './common/maintenance'
 
 const app = express()
 
@@ -34,6 +35,8 @@ const start = async () => {
       app.use(express.json({ extended: false } as Parameters<typeof express.json>[0]))
       app.use(cookieParser())
       app.use(cors({ credentials: true, origin: config.get('client.url') }))
+
+      cleanUpExpiredSessions.start()
       
       // Routes:
       app.use('/', rootRoute)

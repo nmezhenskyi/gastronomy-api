@@ -1,6 +1,6 @@
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import config from 'config'
-import { getRepository } from 'typeorm'
+import { getRepository, LessThan } from 'typeorm'
 import { ServiceResponse } from './service-response'
 import { UserService } from './user-service'
 import { UserRefreshToken } from '../models/user-refresh-token'
@@ -186,6 +186,32 @@ export const TokenService = {
       }
       catch (err) {
          return { success: false, message: 'FAILED' }
+      }
+   },
+
+   /**
+    * Removes expired user refresh tokens from the database.
+    */
+   async cleanUpExpired(): Promise<void> {
+      try {
+         const repository = getRepository(UserRefreshToken)
+
+         const expired = new Date()
+         expired.setDate(expired.getDate() - 14)
+
+         const tokens = await repository.find({
+            where: { expiryDate: LessThan(expired) }
+         })
+
+         if (!tokens || tokens.length === 0) return
+
+         for (const token of tokens) {
+            await repository.remove(token)
+         }
+      }
+      catch (err) {
+         console.error(err)
+         return
       }
    }
 }

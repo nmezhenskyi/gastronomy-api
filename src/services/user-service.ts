@@ -377,7 +377,7 @@ export const UserService = {
     * @param cocktailId Cocktail id
     * @returns ServiceResponse object with updated user account
     */
-   async removeCocktail(userId: string, cocktailId: string): Promise<ServiceResponse<User>> {
+   async removeSavedCocktail(userId: string, cocktailId: string): Promise<ServiceResponse<User>> {
       try {
          const userRepository = getRepository(User)
          const user = await userRepository.findOne(userId)

@@ -210,7 +210,7 @@ router.delete('/saved/cocktails/:cocktailId', authorize(Role.USER), async (req: 
    if (!req.user) return res.status(404).json({ message: 'User not found' })
    if (!req.params.cocktailId) return res.status(404).json({ message: 'Cocktail not found' })
 
-   const result = await UserService.removeCocktail(req.user.id, req.params.cocktailId)
+   const result = await UserService.removeSavedCocktail(req.user.id, req.params.cocktailId)
 
    if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to remove cocktail' })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail not found' })

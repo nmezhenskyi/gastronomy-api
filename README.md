@@ -23,4 +23,4 @@ Configuration files can be found in /config directory.
 * [Nikita Mezhenskyi](https://github.com/nmezhenskyi)
 
 ## License
-This project is licensed under BSD-3-Clause.
+This project is licensed under BSD-3-Clause License.

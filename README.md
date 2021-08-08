@@ -6,14 +6,18 @@ The project is currently in active development stage. There is no stable release
 
 ## Installation
 ### Prerequisites:
-1. Node.js
-2. PostgreSQL
+* Node.js (v14 and higher)
+* PostgreSQL (v12 and higher recommended)
+### Clone the repository:
+* Clone the repository to your local environment or download the code
+### Set up configuration files
+Configuration files can be found in /config directory.
 
 ## Documentation
-### Getting Started:
-
-## License
-BSD-3-Clause
+### Overview of resources and endpoints:
 
 ## Author
-[Nikita Mezhenskyi](https://github.com/nmezhenskyi)
+* [Nikita Mezhenskyi](https://github.com/nmezhenskyi)
+
+## License
+This project is licensed under BSD-3-Clause.

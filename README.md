@@ -8,10 +8,13 @@ The project is currently in active development stage. There is no stable release
 ### Prerequisites:
 * Node.js (v14 and higher)
 * PostgreSQL (v12 and higher recommended)
-### Clone the repository:
+### Install:
 * Clone the repository to your local environment or download the code
-### Set up configuration files
+* Run `npm install` command
+* Run `npm build` command
+### Set up configuration files:
 Configuration files can be found in /config directory.
+* Make sure there is a default.toml file in the /config directory
 
 ## Documentation
 ### Overview of resources and endpoints:

@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { createConnection, ConnectionOptions } from 'typeorm'
 import { PORT, PROD } from './common/constants'
+import { logger } from './common/logger'
 import rootRoute from './routes/root'
 import ingredientsRoute from './routes/ingredients'
 import cocktailsRoute from './routes/cocktails'
@@ -46,10 +47,10 @@ const start = async () => {
       app.use('/member', memberRoute)
       app.use(handleNotFound)
 
-      app.listen(PORT, () => console.log(`Server started on port ${PORT}`))
+      app.listen(PORT, () => logger.info(`Server started on port ${PORT}`))
    }
    catch (err) {
-      console.error(err)
+      logger.error(err)
    }
 }
 

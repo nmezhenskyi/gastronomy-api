@@ -216,11 +216,11 @@ export const MemberService = {
       try {
          const repository = getRepository(Member)
 
-         const user = await repository.findOne(id)
+         const member = await repository.findOne(id)
 
-         if (!user) return { success: false, message: 'NOT_FOUND' }
+         if (!member) return { success: false, message: 'NOT_FOUND' }
 
-         await repository.remove(user)
+         await repository.remove(member)
 
          return {
             success: true,

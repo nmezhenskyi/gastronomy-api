@@ -37,7 +37,7 @@ export class Ingredient {
    cocktails: CocktailToIngredient[]
 
    @OneToMany(() => MealToIngredient, mealToIngredient => mealToIngredient.ingredient)
-   ingredientToMeals: MealToIngredient[]
+   meals: MealToIngredient[]
 
    @CreateDateColumn()
    createdAt!: Date

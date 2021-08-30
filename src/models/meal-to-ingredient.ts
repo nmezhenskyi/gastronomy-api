@@ -20,10 +20,10 @@ export class MealToIngredient {
    @Column()
    amount!: string
 
-   @ManyToOne(() => Meal, meal => meal.mealToIngredients, { onDelete: 'CASCADE' })
+   @ManyToOne(() => Meal, meal => meal.ingredients, { onDelete: 'CASCADE' })
    meal!: Meal
 
-   @ManyToOne(() => Ingredient, ingredient => ingredient.ingredientToMeals, { onDelete: 'SET NULL' })
+   @ManyToOne(() => Ingredient, ingredient => ingredient.meals, { onDelete: 'SET NULL' })
    ingredient!: Ingredient
 
    @CreateDateColumn()

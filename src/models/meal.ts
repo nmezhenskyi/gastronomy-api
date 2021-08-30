@@ -55,7 +55,7 @@ export class Meal {
    notesOnTaste: string | null
 
    @OneToMany(() => MealToIngredient, mealToIngredient => mealToIngredient.meal, { eager: true })
-   mealToIngredients!: MealToIngredient[]
+   ingredients!: MealToIngredient[]
 
    @OneToMany(() => MealReview, mealReview => mealReview.meal)
    reviews!: MealReview[]

@@ -1,0 +1,11 @@
+[database]
+type = "postgres"
+host = "localhost"
+port = "5432"
+database-name = "gastronomy"
+username = "pg-user"
+password = "pg-user"
+
+[typeorm]
+entities = [ "src/models/*.ts" ]
+migrations = [ "src/migrations/*.ts" ]

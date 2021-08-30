@@ -161,6 +161,7 @@ export const CocktailService = {
     * 
     * @param cocktailId Cocktail id
     * @param ingredient Existing ingredient id or new ingredient object
+    * @param amount Amount for the ingredient
     * @returns ServiceResponse object with 'success' property. If 'success' is true, then query was successful and the object has 'body' propery the with created record.
     */
    async addIngredient(cocktailId: string, ingredient: string | { category: string, name: string, description?: string },

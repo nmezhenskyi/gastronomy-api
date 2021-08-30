@@ -11,7 +11,7 @@ import { MealReview } from './meal-review'
 
 @Entity()
 export class Meal {
-   @PrimaryGeneratedColumn()
+   @PrimaryGeneratedColumn('uuid')
    id!: string
 
    @Column({

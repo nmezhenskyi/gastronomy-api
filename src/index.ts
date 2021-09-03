@@ -9,6 +9,7 @@ import { logger } from './common/logger'
 import rootRoute from './routes/root'
 import ingredientsRoute from './routes/ingredients'
 import cocktailsRoute from './routes/cocktails'
+import mealsRoute from './routes/meals'
 import userRoute from './routes/user'
 import memberRoute from './routes/member'
 import { handleNotFound } from './middleware/not-found'
@@ -43,6 +44,7 @@ const start = async () => {
       app.use('/', rootRoute)
       app.use('/ingredients', ingredientsRoute)
       app.use('/cocktails', cocktailsRoute)
+      app.use('/meals', mealsRoute)
       app.use('/user', userRoute)
       app.use('/member', memberRoute)
       app.use(handleNotFound)

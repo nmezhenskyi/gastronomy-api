@@ -24,7 +24,7 @@ export const authorize = (roles: Role | Role[] = []) => {
                         authorized = true
                      break
                   case Role.CREATOR:
-                     if (req.member?.role === Role.CREATOR || req.member?.role === Role.SUPERVISOR)
+                     if (req.member?.role === Role.CREATOR)
                         authorized = true
                      break
                   case Role.SUPERVISOR:

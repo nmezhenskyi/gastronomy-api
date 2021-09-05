@@ -25,8 +25,8 @@ router.get('/', async (req: Request<unknown, unknown, unknown, GetCocktailsQuery
 
    const result = await CocktailService.find({}, paramToInt(offset), paramToInt(limit))
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server Error: Query failed' })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Nothing found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Query failed' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Nothing found' })
 
    return res.status(200).json(result.body)
 })
@@ -40,8 +40,8 @@ router.get('/', async (req: Request<unknown, unknown, unknown, GetCocktailsQuery
 router.get('/:id', async (req, res) => {
    const result = await CocktailService.findOne({ id: req.params.id })
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Server Error: Query failed` })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Cocktail not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: `Query failed` })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail not found' })
 
    return res.status(200).json(result.body)
 })
@@ -62,7 +62,7 @@ body('notesOnTaste').isLength({ max: 1000 }).trim(),
 async (req, res) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Error: Invalid data', errors: errors.array() })
+      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
    const result = await CocktailService.create({
       name: req.body.name,
@@ -73,7 +73,7 @@ async (req, res) => {
       notesOnTaste: req.body.notesOnTaste
    })
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Server Error: Couldn't create cocktail` })
+   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't create cocktail` })
 
    return res.status(200).json(result.body)
 })
@@ -94,9 +94,9 @@ body('notesOnTaste').isLength({ max: 1000 }).trim(),
 async (req, res) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Error: Invalid data', errors: errors.array() })
+      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
-   if (!req.params || !req.params.id) return res.status(400).json({ message: 'Error: Cocktail id is missing in the request URI' })
+   if (!req.params || !req.params.id) return res.status(400).json({ message: 'Cocktail id is missing in the request URI' })
 
    const result = await CocktailService.update({
       id: req.params.id,
@@ -108,8 +108,8 @@ async (req, res) => {
       notesOnTaste: req.body.notesOnTaste
    })
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Server Error: Couldn't update the cocktail` })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't update cocktail` })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail found' })
 
    return res.status(200).json(result)
 })
@@ -129,15 +129,15 @@ body('amount').notEmpty().isLength({ max: 20 }).trim(),
 async (req, res) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Error: Invalid data', errors: errors.array() })
+      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
    if (!req.params || !req.params.id) return res.status(400).json({ message: 'Error: Cocktail id is missing in the request URI' })
 
    let result
-   if (req.body.ingredientId){
+   if (req.body.ingredientId) {
       result = await CocktailService.addIngredient(req.params.id, req.body.ingredientId, req.body.amount)
    }
-   else if (req.body.type && req.body.name) {
+   else if (req.body.category && req.body.name) {
       result = await CocktailService.addIngredient(req.params.id, {
          category: req.body.category,
          name: req.body.name,
@@ -145,13 +145,13 @@ async (req, res) => {
       }, req.body.amount)
    }
    else {
-      return res.status(400).json({ message: 'Error: Ingredient id, type, and name are missing in the request body' })
+      return res.status(400).json({ message: 'Ingredient id or category and name are missing in the request body' })
    }
    
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Server Error: Couldn't add the ingredient to the cocktail` })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Resource not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't add ingredient to  cocktail` })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or ingredient not found' })
 
-   return res.status(200).json(result)
+   return res.status(200).json(result.body)
 })
 
 /**
@@ -163,10 +163,10 @@ async (req, res) => {
 router.delete('/:id/ingredients/:ingredientId', async (req, res) => {
    const result = await CocktailService.removeIngredient(req.params.id, req.params.ingredientId)
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Server Error: Couldn't remove the ingredient from the cocktail` })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Resource not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't remove ingredient from cocktail` })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or ingredient not found' })
 
-   return res.status(200).json({ message: 'Ingredient have been removed from the cocktail' })
+   return res.status(200).json({ message: 'Ingredient has been removed from the cocktail' })
 })
 
 /**
@@ -178,10 +178,10 @@ router.delete('/:id/ingredients/:ingredientId', async (req, res) => {
 router.delete('/:id', async (req, res) => {
    const result = await CocktailService.remove(req.params.id)
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Server Error: Couldn't delete the cocktail` })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Error: Cocktail not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't delete cocktail` })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail not found' })
 
-   return res.status(200).json({ message: 'Cocktail have been deleted' })
+   return res.status(200).json({ message: 'Cocktail has been deleted' })
 })
 
 export default router

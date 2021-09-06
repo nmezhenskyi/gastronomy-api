@@ -133,7 +133,7 @@ async (req: AuthRequest, res: Response) => {
    if (!errors.isEmpty())
       return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
-   if (!req.params || !req.params.id) return res.status(400).json({ message: 'Error: Cocktail id is missing in the request URI' })
+   if (!req.params || !req.params.id) return res.status(400).json({ message: 'Cocktail id is missing in the request URI' })
 
    let result
    if (req.body.ingredientId) {

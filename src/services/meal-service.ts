@@ -55,17 +55,18 @@ export const MealService = {
 
          const found = await repository.createQueryBuilder('m')
             .select([
-               'm.id', 'm.name', 'm.description', 'm.cuisine',
+               'm.id', 'm.name', 'm.description', 'm.cuisine', 'm.instructions',
                'm.notesOnIngredients', 'm.notesOnExecution', 'm.notesOnTaste'
             ])
-            .addSelect(['cti.amount'])
+            .addSelect(['mti.amount'])
             .addSelect(['i.id', 'i.name', 'i.category', 'i.description'])
             .where(`${
                (searchBy.id && searchBy.name) ? 'm.id = :id AND m.name = :name' :
                (searchBy.id ? 'm.id = :id' : (searchBy.name ? 'm.name = :name' : ''))
             }`, { id: searchBy.id, name: searchBy.name })
-            .innerJoin('m.ingredients', 'mti')
-            .innerJoin('mti.ingredient', 'i')
+            .leftJoin('m.ingredients', 'mti')
+            .leftJoin('mti.ingredient', 'i')
+            .orderBy('mti.createdAt', 'DESC')
             .getOne()
 
          if (!found) return { success: false, message: 'NOT_FOUND' }

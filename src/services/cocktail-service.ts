@@ -59,8 +59,9 @@ export const CocktailService = {
                (searchBy.id && searchBy.name) ? 'c.id = :id AND c.name = :name' :
                (searchBy.id ? 'c.id = :id' : (searchBy.name ? 'c.name = :name' : ''))
             }`, { id: searchBy.id, name: searchBy.name })
-            .innerJoin('c.ingredients', 'cti')
-            .innerJoin('cti.ingredient', 'i')
+            .leftJoin('c.ingredients', 'cti')
+            .leftJoin('cti.ingredient', 'i')
+            .orderBy('cti.createdAt', 'DESC')
             .getOne()
 
          if (!found) return { success: false, message: 'NOT_FOUND' }

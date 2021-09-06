@@ -23,7 +23,11 @@ interface GetMealsQuery {
 router.get('/', async (req: Request<unknown, unknown, unknown, GetMealsQuery>, res) => {
    const { name, cuisine, offset, limit } = req.query
 
-   const result = await MealService.find({ name, cuisine }, paramToInt(offset), paramToInt(limit))
+   const searchBy: { name?: string, cuisine?: string } = {}
+   if (name) searchBy.name = name
+   if (cuisine) searchBy.cuisine = cuisine
+
+   const result = await MealService.find(searchBy, paramToInt(offset), paramToInt(limit))
 
    if (result.message === 'FAILED') return res.status(500).json({ message: 'Query failed' })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Nothing found' })

@@ -1,3 +1,5 @@
+# Config overrides for test mode:
+
 [database]
 type = "postgres"
 host = "localhost"

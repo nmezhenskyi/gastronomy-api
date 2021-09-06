@@ -1,7 +1,9 @@
-import express, { Request } from 'express'
+import express, { Request, Response } from 'express'
 import { body, validationResult } from 'express-validator'
 import { CocktailService } from '../services/cocktail-service'
 import { paramToInt } from '../common/utils'
+import { authorize } from '../middleware/authorize'
+import { AuthRequest, Role } from '../common/types'
 
 const router = express.Router()
 
@@ -50,16 +52,16 @@ router.get('/:id', async (req, res) => {
  * Create new cocktail.
  * 
  * @route   POST /cocktails
- * @access  Public
+ * @access  Private (Creator, Supervisor)
  */
-router.post('/',
+router.post('/', authorize([Role.CREATOR, Role.SUPERVISOR]),
 body('name').notEmpty().isLength({ max: 100 }).trim(),
 body('description').isLength({ max: 5000 }).trim(),
 body('method').notEmpty().isLength({ max: 3000 }).trim(),
 body('notesOnIngredients').isLength({ max: 2000 }).trim(),
 body('notesOnExecution').isLength({ max: 2000 }).trim(),
 body('notesOnTaste').isLength({ max: 1000 }).trim(),
-async (req, res) => {
+async (req: AuthRequest, res: Response) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
       return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
@@ -79,19 +81,19 @@ async (req, res) => {
 })
 
 /**
- * Update the cocktail by id.
+ * Update cocktail by id.
  * 
  * @route   PUT /cocktails/:id
- * @access  Public
+ * @access  Private (Creator, Supervisor)
  */
-router.put('/:id',
+router.put('/:id', authorize([Role.CREATOR, Role.SUPERVISOR]),
 body('name').isLength({ max: 100 }).trim(),
 body('description').isLength({ max: 5000 }).trim(),
 body('method').isLength({ max: 3000 }).trim(),
 body('notesOnIngredients').isLength({ max: 2000 }).trim(),
 body('notesOnExecution').isLength({ max: 2000 }).trim(),
 body('notesOnTaste').isLength({ max: 1000 }).trim(),
-async (req, res) => {
+async (req: AuthRequest, res: Response) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
       return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
@@ -115,18 +117,18 @@ async (req, res) => {
 })
 
 /**
- * Add ingredient to the cocktail.
+ * Add ingredient to cocktail.
  * 
  * @route   PUT /cocktails/:id/ingredients
- * @access  Public
+ * @access  Private (Creator, Supervisor)
  */
-router.put('/:id/ingredients',
+router.put('/:id/ingredients', authorize([Role.CREATOR, Role.SUPERVISOR]),
 body('ingredientId').isLength({ max: 36 }),
 body('category').isLength({ max: 150 }).trim(),
 body('name').isLength({ max: 150 }).trim(),
 body('description').isLength({ max: 5000 }).trim(),
 body('amount').notEmpty().isLength({ max: 20 }).trim(),
-async (req, res) => {
+async (req: AuthRequest, res: Response) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
       return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
@@ -155,12 +157,13 @@ async (req, res) => {
 })
 
 /**
- * Remove ingredient from the cocktail.
+ * Remove ingredient from cocktail.
  * 
  * @route   DELETE /cocktails/:id/ingredients/:ingredientId
- * @access  Public
+ * @access  Private (Creator, Supervisor)
  */
-router.delete('/:id/ingredients/:ingredientId', async (req, res) => {
+router.delete('/:id/ingredients/:ingredientId', authorize([Role.CREATOR, Role.SUPERVISOR]),
+async (req: AuthRequest, res: Response) => {
    const result = await CocktailService.removeIngredient(req.params.id, req.params.ingredientId)
 
    if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't remove ingredient from cocktail` })
@@ -170,12 +173,13 @@ router.delete('/:id/ingredients/:ingredientId', async (req, res) => {
 })
 
 /**
- * Delete the cocktail by id.
+ * Delete cocktail by id.
  * 
  * @route   DELETE /cocktails/:id
- * @access  Public
+ * @access  Private (Creator, Supervisor)
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authorize([Role.CREATOR, Role.SUPERVISOR]),
+async (req: AuthRequest, res: Response) => {
    const result = await CocktailService.remove(req.params.id)
 
    if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't delete cocktail` })

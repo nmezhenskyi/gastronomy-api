@@ -45,7 +45,7 @@ router.get('/:id', async (req, res) => {
    const result = await MealService.findOne({ id: req.params.id })
 
    if (result.message === 'FAILED') return res.status(500).json({ message: 'Query failed' })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Meal found' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Meal not found' })
 
    return res.status(200).json(result.body)
 })

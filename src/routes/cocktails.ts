@@ -11,9 +11,9 @@ const router = express.Router()
  * Represents query parameters for the ```GET /cocktails``` request.
  */
 interface GetCocktailsQuery {
-   offset: string,
-   limit: string,
-   name: string
+   offset?: string,
+   limit?: string,
+   name?: string
 }
 
 /**

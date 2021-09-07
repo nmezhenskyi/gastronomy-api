@@ -5,6 +5,8 @@ import { ServiceResponse } from './service-response'
 import { TokenService } from './token-service'
 import { TokenPair } from '../common/types'
 import { CocktailService } from './cocktail-service'
+import { MealService } from './meal-service'
+import { logger } from '../common/logger'
 
 interface UserWithTokenPair {
    user: User,
@@ -42,6 +44,7 @@ export const UserService = {
          }
       }
       catch (err) {
+         logger.error(`UserService.find(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    },
@@ -70,6 +73,7 @@ export const UserService = {
          }
       }
       catch (err) {
+         logger.error(`UserService.findOne(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    },
@@ -100,6 +104,7 @@ export const UserService = {
          }
       }
       catch (err) {
+         logger.error(`UserService.findByCredentials(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    },
@@ -136,6 +141,7 @@ export const UserService = {
          }
       }
       catch (err) {
+         logger.error(`UserService.create(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    },
@@ -279,6 +285,7 @@ export const UserService = {
          }
       }
       catch (err) {
+         logger.error(`UserService.update(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    },
@@ -306,6 +313,7 @@ export const UserService = {
          }
       }
       catch (err) {
+         logger.error(`UserService.remove(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    },
@@ -341,7 +349,7 @@ export const UserService = {
          }
       }
       catch (err) {
-         console.error(err)
+         logger.error(`UserService.saveCocktail(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    },
@@ -350,12 +358,16 @@ export const UserService = {
     * Finds cocktails from the user's list of saved cocktails.
     * 
     * @param userId User's id
-    * @returns ServiceResponse object
+    * @returns ServiceResponse object with user account containing saved cocktails
     */
    async findSavedCocktails(userId: string): Promise<ServiceResponse<User>> {
       try {
          const userRepository = getRepository(User)
-         const user = await userRepository.findOne({ where: { id: userId }, relations: ['savedCocktails']})
+         const user = await userRepository.findOne({
+            select: ['savedCocktails'],
+            where: { id: userId },
+            relations: ['savedCocktails']
+         })
          if (!user) return { success: false, message: 'NOT_FOUND' }
 
          return {
@@ -365,7 +377,7 @@ export const UserService = {
          }
       }
       catch (err) {
-         console.error(err)
+         logger.error(`UserService.findSavedCocktails(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    },
@@ -398,6 +410,104 @@ export const UserService = {
          }
       }
       catch (err) {
+         logger.error(`UserService.removeSavedCocktail(): ${err}`)
+         return { success: false, message: 'FAILED' }
+      }
+   },
+
+   /**
+    * Add meal to user's list of saved meals.
+    * 
+    * @param userId User id
+    * @param mealId Meal id
+    * @returns ServiceResponse object with updated user account
+    */
+   async saveMeal(userId: string, mealId: string): Promise<ServiceResponse<User>> {
+      try {
+         const userRepository = getRepository(User)
+         const user = await userRepository.findOne(userId)
+         if (!user) return { success: false, message: 'NOT_FOUND' }
+
+         const meal = await MealService.findOne({ id: mealId })
+         if (meal.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
+         if (meal.message === 'FAILED' || !meal.body) return { success: false, message: 'FAILED' }
+
+         if (!user.savedMeals)
+            user.savedMeals = [meal.body]
+         else
+            user.savedMeals.push(meal.body)
+
+         const saved = await userRepository.save(user)
+
+         return {
+            success: true,
+            message: 'UPDATED',
+            body: saved
+         }
+      }
+      catch (err) {
+         logger.error(`UserService.saveMeal(): ${err}`)
+         return { success: false, message: 'FAILED' }
+      }
+   },
+
+   /**
+    * Finds meals from user's list of saved meals.
+    * 
+    * @param userId User id
+    * @returns ServiceResponse object with user account containing saved meals
+    */
+   async findSavedMeals(userId: string): Promise<ServiceResponse<User>> {
+      try {
+         const userRepository = getRepository(User)
+         const user = await userRepository.findOne({
+            select: ['savedMeals'],
+            where: { id: userId },
+            relations: ['savedMeals']
+         })
+         if (!user) return { success: false, message: 'NOT_FOUND' }
+
+         return {
+            success: true,
+            message: 'FOUND',
+            body: user
+         }
+      }
+      catch (err) {
+         logger.error(`UserService.findSavedMeals(): ${err}`)
+         return { success: false, message: 'FAILED' }
+      }
+   },
+
+   /**
+    * Removes meal from user's list of saved meals.
+    * 
+    * @param userId User id
+    * @param mealId Meal id
+    * @returns ServiceResponse object with updated user account
+    */
+   async removeSavedMeal(userId: string, mealId: string): Promise<ServiceResponse<User>> {
+      try {
+         const userRepository = getRepository(User)
+         const user = await userRepository.findOne(userId)
+         if (!user) return { success: false, message: 'NOT_FOUND' }
+
+         if (user.savedMeals && user.savedMeals.length > 0) {
+            user.savedMeals = user.savedMeals.filter(meal => {
+               meal.id !== mealId
+            })
+         }
+
+         const saved = await userRepository.save(user)
+
+         return {
+            success: true,
+            message: 'UPDATED',
+            body: saved
+         }
+      }
+      catch (err) {
+         logger.error(`UserService.removeSavedMeal(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    }

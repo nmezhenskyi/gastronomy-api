@@ -2,16 +2,9 @@ import express, { Request } from 'express'
 import { body, validationResult } from 'express-validator'
 import { IngredientService } from '../services/ingredient-service'
 import { paramToInt } from '../common/utils'
+import { Pagination } from '../common/types'
 
 const router = express.Router()
-
-/**
- * Represents query parameters for the ```GET /ingredients``` request.
- */
- interface GetIngredientsQuery {
-   offset: string,
-   limit: string
-}
 
 /**
  * Retrieve ingredients.
@@ -19,7 +12,7 @@ const router = express.Router()
  * @route   GET /ingredients 
  * @access  Public
  */
-router.get('/', async (req: Request<unknown, unknown, unknown, GetIngredientsQuery>, res) => {
+router.get('/', async (req: Request<unknown, unknown, unknown, Pagination>, res) => {
    const { offset, limit } = req.query
 
    const result = await IngredientService.find({}, paramToInt(offset), paramToInt(limit))

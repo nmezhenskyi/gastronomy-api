@@ -3,14 +3,12 @@ import { body, validationResult } from 'express-validator'
 import { MealService } from '../services/meal-service'
 import { paramToInt } from '../common/utils'
 import { authorize } from '../middleware/authorize'
-import { AuthRequest, Role } from '../common/types'
+import { AuthRequest, Pagination, Role } from '../common/types'
 
 const router = express.Router()
 
-interface GetMealsQuery {
-   offset?: string,
-   limit?: string,
-   name?: string,
+interface GetMealsQuery extends Pagination {
+   name?: string
    cuisine?: string
 }
 

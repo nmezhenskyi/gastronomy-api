@@ -3,16 +3,14 @@ import { body, validationResult } from 'express-validator'
 import { CocktailService } from '../services/cocktail-service'
 import { paramToInt } from '../common/utils'
 import { authorize } from '../middleware/authorize'
-import { AuthRequest, Role } from '../common/types'
+import { AuthRequest, Pagination, Role } from '../common/types'
 
 const router = express.Router()
 
 /**
  * Represents query parameters for the ```GET /cocktails``` request.
  */
-interface GetCocktailsQuery {
-   offset?: string,
-   limit?: string,
+interface GetCocktailsQuery extends Pagination {
    name?: string
 }
 

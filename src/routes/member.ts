@@ -38,6 +38,32 @@ async (req: AuthRequest, res: Response) => {
 })
 
 /**
+ * Delete member account.
+ * Supervisor can only delete Creator or itself.
+ * 
+ * @route   DELETE /member/:id
+ * @access  Private (Supervisor)
+ */
+router.delete('/:id', authorize(Role.SUPERVISOR), async (req: AuthRequest, res: Response) => {
+   if (req.member?.id === req.params.id) {
+      const result = await MemberService.remove(req.params.id)
+      if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Member account not found' })
+      if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't delete member account due to unexpected error` })
+      return res.status(200).json({ message: 'Member account has been deleted' })
+   }
+
+   const member = await MemberService.findOne({ id: req.params.id })
+   if (member.message === 'NOT_FOUND') return res.status(404).json({ message: 'Member account not found' })
+   if (member.message === 'FAILED' || !member.body) return res.status(500).json({ message: `Couldn't delete member account due to unexpected error` })
+   if (member.body.role.toString() === Role.SUPERVISOR) return res.status(403).json({ message: 'Forbidden' })
+
+   const result = await MemberService.remove(req.params.id)
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Member account not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't delete member account due to unexpected error` })
+   return res.status(200).json({ message: 'Member account has been deleted' })
+})
+
+/**
  * Log in as a member.
  * 
  * @route   POST /member/login
@@ -58,7 +84,5 @@ async (req, res) => {
 
    return res.status(200).json(result.body)
 })
-
-
 
 export default router

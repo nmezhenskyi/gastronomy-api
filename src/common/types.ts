@@ -21,7 +21,7 @@ export interface AuthRequest extends Request {
       id: string
    },
    member?: {
-      id: string,
+      id: string
       role: string
    }
 }
@@ -30,6 +30,14 @@ export interface AuthRequest extends Request {
  * Pair of access and refresh tokens.
  */
 export interface TokenPair {
-   accessToken: string,
+   accessToken: string
    refreshToken: string
+}
+
+/**
+ * Represents pagination settings.
+ */
+export interface Pagination {
+   offset?: string
+   limit?: string
 }

@@ -1,7 +1,9 @@
 import { getRepository } from 'typeorm'
 import { MealReview } from '../models/meal-review'
+import { CocktailReview } from '../models/cocktail-review'
 import { ServiceResponse } from './service-response'
 import { MealService } from './meal-service'
+import { CocktailService } from './cocktail-service'
 import { UserService } from './user-service'
 import { logger } from '../common/logger'
 
@@ -11,7 +13,7 @@ export const ReviewService = {
     * 
     * @param mealId Meal id
     * @param userId User id
-    * @param body New review
+    * @param body New meal review
     * @returns ServiceResponse object with created meal review
     */
     async createMealReview(userId: string, mealId: string, body: {
@@ -44,7 +46,7 @@ export const ReviewService = {
          }
       }
       catch (err) {
-         logger.error(`UserService.postMealReview(): ${err}`)
+         logger.error(`ReviewService.createMealReview(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    },
@@ -54,7 +56,7 @@ export const ReviewService = {
     * 
     * @param userId User id
     * @param mealId Meal id
-    * @param body Updated review
+    * @param body Updated meal review
     * @returns ServiceResponse object with updated meal review
     */
    async updateMealReview(userId: string, mealId: string, body: {
@@ -81,7 +83,7 @@ export const ReviewService = {
          }
       }
       catch (err) {
-         logger.error(`UserService.updateMealReview(): ${err}`)
+         logger.error(`ReviewService.updateMealReview(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    },
@@ -108,7 +110,7 @@ export const ReviewService = {
          }
       }
       catch (err) {
-         logger.error(`UserService.removeMealReview(): ${err}`)
+         logger.error(`ReviewService.removeMealReview(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    },
@@ -123,17 +125,17 @@ export const ReviewService = {
    async findMealReview(userId: string, mealId: string): Promise<ServiceResponse<MealReview>> {
       try {
          const repository = getRepository(MealReview)
-         const mealReview = await repository.findOne({ where: { userId, mealId } })
-         if (!mealReview) return { success: false, message: 'NOT_FOUND' }
+         const found = await repository.findOne({ where: { userId, mealId } })
+         if (!found) return { success: false, message: 'NOT_FOUND' }
 
          return {
             success: true,
             message: 'FOUND',
-            body: mealReview
+            body: found
          }
       }
       catch (err) {
-         logger.error(`UserService.findMealReview(): ${err}`)
+         logger.error(`ReviewService.findMealReview(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    },
@@ -142,27 +144,192 @@ export const ReviewService = {
     * Finds meal reviews that match given conditions.
     * 
     * @param searchBy Search condition
+    * @param offset Search offset
+    * @param limit Search limit
     * @returns ServiceResponse object with array of found meal reviews
     */
    async findMealReviews(searchBy?: { userId?: string, mealId?: string }, offset = 0, limit = 0): Promise<ServiceResponse<MealReview[]>> {
       try {
          const repository = getRepository(MealReview)
-         const mealReviews = await repository.find({
+         const found = await repository.find({
             where: searchBy,
             order: { createdAt: 'DESC' },
             skip: offset,
             take: limit
          })
-         if (!mealReviews || mealReviews.length === 0) return { success: false, message: 'NOT_FOUND' }
+         if (!found || found.length === 0) return { success: false, message: 'NOT_FOUND' }
 
          return {
             success: true,
             message: 'FOUND',
-            body: mealReviews
+            body: found
          }
       }
       catch (err) {
-         logger.error(`UserService.findMealReviews(): ${err}`)
+         logger.error(`ReviewService.findMealReviews(): ${err}`)
+         return { success: false, message: 'FAILED' }
+      }
+   },
+
+   /**
+    * Saves cocktail review.
+    * 
+    * @param userId User id
+    * @param cocktailId Cocktail id
+    * @param body New cocktail review
+    * @returns ServiceResponse object with created cocktail review
+    */
+   async createCocktailReview(userId: string, cocktailId: string, body: {
+      rating: number,
+      review: string
+   }): Promise<ServiceResponse<CocktailReview>> {
+      try {
+         const cocktail = await CocktailService.findOne({ id: cocktailId })
+         if (cocktail.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
+         if (cocktail.message === 'FAILED' || !cocktail.body) return { success: false, message: 'FAILED' }
+
+         const user = await UserService.findOne({ id: userId })
+         if (user.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
+         if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
+
+         if (body.rating < 0 || body.rating > 5) return { success: false, message: 'INVALID' }
+
+         const repository = getRepository(CocktailReview)
+         const cocktailReview = new CocktailReview()
+         cocktailReview.cocktail = cocktail.body
+         cocktailReview.user = user.body
+         cocktailReview.rating = body.rating
+         cocktailReview.review = body.review
+         const saved = await repository.save(cocktailReview)
+
+         return {
+            success: true,
+            message: 'CREATED',
+            body: saved
+         }
+      }
+      catch (err) {
+         logger.error(`ReviewService.createCocktailReview(): ${err}`)
+         return { success: false, message: 'FAILED' }
+      }
+   },
+
+   /**
+    * Updates cocktail review.
+    * 
+    * @param userId User id
+    * @param cocktailId Meal id
+    * @param body Updated cocktail review
+    * @returns 
+    */
+   async updateCocktailReview(userId: string, cocktailId: string, body: {
+      rating?: number,
+      review?: string
+   }): Promise<ServiceResponse<CocktailReview>> {
+      try {
+         const repository = getRepository(CocktailReview)
+         const cocktailReview = await repository.findOne({ where: { userId, cocktailId } })
+         if (!cocktailReview) return { success: false, message: 'NOT_FOUND' }
+
+         if (body.rating) {
+            if (body.rating < 0 || body.rating > 5) return { success: false, message: 'INVALID' }
+            cocktailReview.rating = body.rating
+         }
+         if (body.review) cocktailReview.review = body.review
+
+         const saved = await repository.save(cocktailReview)
+
+         return {
+            success: true,
+            message: 'UPDATED',
+            body: saved
+         }
+      }
+      catch (err) {
+         logger.error(`ReviewService.updateCocktailReview(): ${err}`)
+         return { success: false, message: 'FAILED' }
+      }
+   },
+
+   /**
+    * Removes cocktail review.
+    * 
+    * @param userId User id
+    * @param cocktailId Cocktail id
+    * @returns ServiceResponse object
+    */
+   async removeCocktailReview(userId: string, cocktailId: string): Promise<ServiceResponse<null>> {
+      try {
+         const repository = getRepository(CocktailReview)
+         const cocktailReview = await repository.findOne({ where: { userId, cocktailId } })
+         if (!cocktailReview) return { success: false, message: 'NOT_FOUND' }
+
+         await repository.remove(cocktailReview)
+
+         return {
+            success: true,
+            message: 'REMOVED',
+            body: null
+         }
+      }
+      catch (err) {
+         logger.error(`ReviewService.removeCocktailReview(): ${err}`)
+         return { success: false, message: 'FAILED' }
+      }
+   },
+
+   /**
+    * Finds cocktail review by user id and cocktail id.
+    * 
+    * @param userId User id
+    * @param cocktailId Meal id
+    * @returns ServiceResponse object with found cocktail review
+    */
+   async findCocktailReview(userId: string, cocktailId: string): Promise<ServiceResponse<CocktailReview>> {
+      try {
+         const repository = getRepository(CocktailReview)
+         const found = await repository.findOne({ where: { userId, cocktailId } })
+         if (!found) return { success: false, message: 'NOT_FOUND' }
+
+         return {
+            success: true,
+            message: 'FOUND',
+            body: found
+         }
+      }
+      catch (err) {
+         logger.error(`ReviewService.findCocktailReview(): ${err}`)
+         return { success: false, message: 'FAILED' }
+      }
+   },
+
+   /**
+    * Finds cocktail reviews that match given conditions.
+    * 
+    * @param searchBy Search condition
+    * @param offset Search offset
+    * @param limit Search limit
+    * @returns ServiceResponse object with array of found cocktail reviews
+    */
+   async findCocktailReviews(searchBy?: { userId?: string, cocktailId?: string }, offset = 0, limit = 0): Promise<ServiceResponse<CocktailReview[]>> {
+      try {
+         const repository = getRepository(CocktailReview)
+         const found = await repository.find({
+            where: searchBy,
+            order: { createdAt: 'DESC' },
+            skip: offset,
+            take: limit
+         })
+         if (!found || found.length === 0) return { success: false, message: 'NOT_FOUND' }
+
+         return {
+            success: true,
+            message: 'FOUND',
+            body: found
+         }
+      }
+      catch (err) {
+         logger.error(`ReviewService.findCocktailReviews(): ${err}`)
          return { success: false, message: 'FAILED' }
       }
    }

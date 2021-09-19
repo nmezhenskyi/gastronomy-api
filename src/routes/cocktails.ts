@@ -194,12 +194,12 @@ async (req: AuthRequest, res: Response) => {
  * @access  Public
  */
 router.get('/:id/reviews', async (req, res) => {
-   const result = await ReviewService.findCocktailReviews({ cocktailId: req.params.id })
+   const foundReviews = await ReviewService.findCocktailReviews({ cocktailId: req.params.id })
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Find reviews query failed` })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No reviews found' })
+   if (foundReviews.message === 'NOT_FOUND') return res.status(404).json({ message: 'No reviews found' })
+   if (foundReviews.message === 'FAILED') return res.status(500).json({ message: 'Find reviews query failed' })
 
-   return res.status(200).json(result.body)
+   return res.status(200).json(foundReviews.body)
 })
 
 /**
@@ -223,7 +223,7 @@ async (req: AuthRequest, res: Response) => {
 
    if (savedReview.message === 'INVALID') return res.status(400).json({ message: 'Invalid data in the request body' })
    if (savedReview.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or user account not found' })
-   if (savedReview.message === 'FAILED') return res.status(500).json({ message: `Failed to create cocktail review` })
+   if (savedReview.message === 'FAILED') return res.status(500).json({ message: 'Failed to create cocktail review' })
 
    return res.status(200).json(savedReview.body)
 })
@@ -239,7 +239,7 @@ body('review').isLength({ max: 2000 }).trim(),
 async (req: AuthRequest, res: Response) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Invalud data in the request body', errors: errors.array() })
+      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
    const updatedReview = await ReviewService.updateCocktailReview(req.user!.id, req.params.id, {
       rating: req.body.rating,
@@ -248,7 +248,7 @@ async (req: AuthRequest, res: Response) => {
 
    if (updatedReview.message === 'INVALID') return res.status(400).json({ message: 'Invalid data in the request body' })
    if (updatedReview.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or user account not found' })
-   if (updatedReview.message === 'FAILED') return res.status(500).json({ message: `Failed to update cocktail review` })
+   if (updatedReview.message === 'FAILED') return res.status(500).json({ message: 'Failed to update cocktail review' })
 
    return res.status(200).json(updatedReview.body)
 })

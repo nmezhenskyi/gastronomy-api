@@ -21,7 +21,7 @@ body('lastName').notEmpty().isLength({ max: 50 }).trim(),
 async (req: AuthRequest, res: Response) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Invalid data', errors: errors.array() })
+      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
    const result = await MemberService.create({
       firstName: req.body.firstName,
@@ -32,7 +32,7 @@ async (req: AuthRequest, res: Response) => {
    })
 
    if (result.message === 'INVALID') return res.status(400).json({ message: 'Member with this email already exists' })
-   if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: `Couldn't create member account` })
+   if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: 'Failed to create member account' })
 
    return res.status(200).json(result.body)
 })
@@ -48,18 +48,18 @@ router.delete('/:id', authorize(Role.SUPERVISOR), async (req: AuthRequest, res: 
    if (req.member?.id === req.params.id) {
       const result = await MemberService.remove(req.params.id)
       if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Member account not found' })
-      if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't delete member account due to unexpected error` })
+      if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to delete member account due to unexpected error' })
       return res.status(200).json({ message: 'Member account has been deleted' })
    }
 
    const member = await MemberService.findOne({ id: req.params.id })
    if (member.message === 'NOT_FOUND') return res.status(404).json({ message: 'Member account not found' })
-   if (member.message === 'FAILED' || !member.body) return res.status(500).json({ message: `Couldn't delete member account due to unexpected error` })
+   if (member.message === 'FAILED' || !member.body) return res.status(500).json({ message: `Failed to delete member account due to unexpected error` })
    if (member.body.role.toString() === Role.SUPERVISOR) return res.status(403).json({ message: 'Forbidden' })
 
    const result = await MemberService.remove(req.params.id)
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Member account not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't delete member account due to unexpected error` })
+   if (result.message === 'FAILED') return res.status(500).json({ message: `Failed to delete member account due to unexpected error` })
    return res.status(200).json({ message: 'Member account has been deleted' })
 })
 
@@ -75,12 +75,12 @@ body('password').notEmpty().isLength({ min: 6, max: 50 }),
 async (req, res) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Error: Invalid data', errors: errors.array() })
+      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
    const result = await MemberService.login(req.body.email, req.body.password)
 
    if (result.message === 'NOT_FOUND') return res.status(400).json({ message: `Wrong credentials` })
-   if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: `Couldn't log in` })
+   if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: `Failed to log in` })
 
    return res.status(200).json(result.body)
 })

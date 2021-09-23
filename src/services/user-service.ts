@@ -368,7 +368,7 @@ export const UserService = {
             where: { id: userId },
             relations: ['savedCocktails']
          })
-         if (!user) return { success: false, message: 'NOT_FOUND' }
+         if (!user || !user.savedCocktails || user.savedCocktails.length === 0) return { success: false, message: 'NOT_FOUND' }
 
          return {
             success: true,
@@ -465,7 +465,7 @@ export const UserService = {
             where: { id: userId },
             relations: ['savedMeals']
          })
-         if (!user) return { success: false, message: 'NOT_FOUND' }
+         if (!user || !user.savedMeals || user.savedMeals.length === 0) return { success: false, message: 'NOT_FOUND' }
 
          return {
             success: true,

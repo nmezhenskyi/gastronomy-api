@@ -160,42 +160,38 @@ router.delete('/profile', authorize(Role.USER), async (req: AuthRequest, res: Re
 })
 
 /**
- * Get user's saved cocktails.
+ * Find user's saved cocktails.
  * 
  * @route   GET /user/saved/cocktails
  * @access  Private (User)
  */
 router.get('/saved/cocktails', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
-   if (!req.user) return res.status(404).json({ message: 'User not found' })
+   const result = await UserService.findSavedCocktails(req.user!.id)
 
-   const result = await UserService.findSavedCocktails(req.user.id)
-
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Failed` })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Not found' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No saved cocktails were found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to find saved cocktails' })
 
    return res.status(200).json(result.body)
 })
 
 /**
- * Add cockctail to the list of saved cocktails.
+ * Add cocktail to the list of saved cocktails.
  * 
  * @route   PUT /user/saved/cocktails
  * @access  Private (User)
  */
-router.post('/saved/cocktails',
+router.put('/saved/cocktails',
 authorize(Role.USER),
-body('cocktailId').notEmpty().trim(),
+body('cocktailId').isLength({ min: 0, max: 255 }).trim(),
 async (req: AuthRequest, res: Response) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Error: Invalid data', errors: errors.array() })
+      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
-   if (!req.user) return res.status(404).json({ message: 'User not found' })
+   const result = await UserService.saveCocktail(req.user!.id, req.body.cocktailId)
 
-   const result = await UserService.saveCocktail(req.user.id, req.body.cocktailId)
-
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Failed` })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Not found' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to save cocktail' })
 
    return res.status(200).json(result.body)
 })
@@ -207,15 +203,73 @@ async (req: AuthRequest, res: Response) => {
  * @access  Private (User)
  */
 router.delete('/saved/cocktails/:cocktailId', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
-   if (!req.user) return res.status(404).json({ message: 'User not found' })
    if (!req.params.cocktailId) return res.status(404).json({ message: 'Cocktail not found' })
 
-   const result = await UserService.removeSavedCocktail(req.user.id, req.params.cocktailId)
+   const result = await UserService.removeSavedCocktail(req.user!.id, req.params.cocktailId)
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to remove cocktail' })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail not found' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to remove saved cocktail' })
 
    return res.status(200).json({ message: 'Cocktail has been removed from saved cocktails' })
 })
+
+/**
+ * Find user's saved meals.
+ * 
+ * @route   GET /user/saved/meals
+ * @access  Private (User)
+ */
+router.get('/saved/meals', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
+   const result = await UserService.findSavedMeals(req.user!.id)
+
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to find saved meals' })
+
+   return res.status(200).json(result.body)
+})
+
+/**
+ * Add meal to the list of saved meals.
+ * 
+ * @route   PUT /user/saved/cocktails
+ * @access  Private (User)
+ */
+router.put('/saved/meals', authorize(Role.USER),
+body('mealId').isLength({ min: 0, max: 255 }).trim(),
+async (req: AuthRequest, res: Response) => {
+   const errors = validationResult(req)
+   if (!errors.isEmpty())
+      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
+
+   const result = await UserService.saveMeal(req.user!.id, req.body.mealId)
+
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to save meal' })
+
+   return res.status(200).json(result.body)
+})
+
+/**
+ * Remove meal from the list of saved meals.
+ * 
+ * @route   DELETE /user/saved/meals/:mealId
+ * @access  Private (User)
+ */
+router.delete('/saved/meals/:mealId', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
+   if (!req.params.mealId) return res.status(404).json({ message: 'Meal not found' })
+
+   const result = await UserService.removeSavedMeal(req.user!.id, req.params.mealId)
+
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to remove saved meal' })
+
+   return res.status(200).json({ message: 'Meal has been removed from saved meals' })
+})
+
+/**
+ * @todo Find reviews for meals and cocktails
+ */
+
+//router.get('/meal-reviews', authorize(Role.USER))
 
 export default router

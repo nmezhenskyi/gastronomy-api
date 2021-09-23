@@ -1,6 +1,7 @@
 import express, { Response } from 'express'
 import { body, validationResult } from 'express-validator'
 import { UserService } from '../services/user-service'
+import { ReviewService } from '../services/review-service'
 import { authorize } from '../middleware/authorize'
 import { AuthRequest, Role } from '../common/types'
 
@@ -190,7 +191,7 @@ async (req: AuthRequest, res: Response) => {
 
    const result = await UserService.saveCocktail(req.user!.id, req.body.cocktailId)
 
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or user not found' })
    if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to save cocktail' })
 
    return res.status(200).json(result.body)
@@ -222,7 +223,7 @@ router.delete('/saved/cocktails/:cocktailId', authorize(Role.USER), async (req: 
 router.get('/saved/meals', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
    const result = await UserService.findSavedMeals(req.user!.id)
 
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No saved meals were found' })
    if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to find saved meals' })
 
    return res.status(200).json(result.body)
@@ -243,7 +244,7 @@ async (req: AuthRequest, res: Response) => {
 
    const result = await UserService.saveMeal(req.user!.id, req.body.mealId)
 
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Meal and/or user not found' })
    if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to save meal' })
 
    return res.status(200).json(result.body)
@@ -267,9 +268,33 @@ router.delete('/saved/meals/:mealId', authorize(Role.USER), async (req: AuthRequ
 })
 
 /**
- * @todo Find reviews for meals and cocktails
+ * Find user's cocktail reviews.
+ * 
+ * @route   GET /user/cocktail-reviews
+ * @access  Private(User)
  */
+ router.get('/cocktail-reviews', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
+   const result = await ReviewService.findCocktailReviews({ userId: req.user!.id })
 
-//router.get('/meal-reviews', authorize(Role.USER))
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No cocktail reviews were found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to find cocktail reviews' })
+
+   return res.status(200).json(result.body)
+})
+
+/**
+ * Find user's meal reviews.
+ * 
+ * @route   GET /user/meal-reviews
+ * @access  Private (User)
+ */
+router.get('/meal-reviews', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
+   const result = await ReviewService.findMealReviews({ userId: req.user!.id })
+
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No meal reviews were found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to find meal reviews' })
+
+   return res.status(200).json(result.body)
+})
 
 export default router

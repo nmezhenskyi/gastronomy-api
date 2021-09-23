@@ -1,5 +1,7 @@
-# GastronomyAPI
-Gastronomy API is a RESTful API that provides meal and cocktail recipes.
+# Gastronomy API
+Gastronomy API is a RESTful API that provides meal and cocktail recipes.  
+Users can save the recipes they like to their account as well as write reviews.  
+Members (staff) are responsible for managing meals, cocktails, and ingredients.  
 
 ## Status
 The project is currently in active development stage. There is no stable release version available as of yet.
@@ -9,9 +11,9 @@ The project is currently in active development stage. There is no stable release
 * Node.js (v14 and higher)
 * PostgreSQL (v12 and higher recommended)
 ### Install:
-* Clone the repository to your local environment or download the code
-* Run `npm install` command
-* Run `npm build` command
+* Clone the repository to your local environment or download the code.
+* Run `npm install` command.
+* Run `npm build` command.
 ### Set up configuration files:
 Configuration files can be found in /config directory.
 * Make sure there is a `default.toml` file in the /config directory.

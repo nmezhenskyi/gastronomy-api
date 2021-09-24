@@ -35,17 +35,17 @@ async (req: AuthRequest, res: Response) => {
    if (!errors.isEmpty())
       return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
-   const result = await MemberService.create({
+   const createdMember = await MemberService.create({
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
       password: req.body.password,
       role: Role.CREATOR
    })
-   if (result.message === 'INVALID') return res.status(400).json({ message: 'Member with this email already exists' })
-   if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: 'Failed to create member account' })
+   if (createdMember.message === 'INVALID') return res.status(400).json({ message: 'Member with this email already exists' })
+   if (createdMember.message === 'FAILED' || !createdMember.body) return res.status(500).json({ message: 'Server failed to create member account' })
 
-   return res.status(200).json(result.body)
+   return res.status(200).json(createdMember.body)
 })
 
 /**
@@ -54,7 +54,28 @@ async (req: AuthRequest, res: Response) => {
  * @route   PUT /member/profile
  * @access  Private (Creator, Supervisor)
  */
-//router.put('/profile', authorize([Role.CREATOR, Role.SUPERVISOR]))
+router.put('/profile', authorize([Role.CREATOR, Role.SUPERVISOR]),
+body('firstName').optional().isLength({ min: 1, max: 50 }).trim(),
+body('lastName').optional().isLength({ min: 1, max: 50 }).trim(),
+body('email').optional().isEmail(),
+body('password').optional().isLength({ min: 6, max: 50 }),
+async (req: AuthRequest, res: Response) => {
+   const errors = validationResult(req)
+   if (!errors.isEmpty())
+      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
+
+   const updatedMember = await MemberService.update({
+      id: req.member!.id,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      password: req.body.password
+   })
+   if (updatedMember.message === 'NOT_FOUND') return res.status(404).json({ message: 'Member not found' })
+   if (updatedMember.message === 'FAILED') return res.status(500).json({ message: 'Server failed to updated member account' })
+
+   return res.status(200).json(updatedMember.body)
+})
 
 /**
  * Delete member account.
@@ -97,8 +118,8 @@ async (req, res) => {
       return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
    const result = await MemberService.login(req.body.email, req.body.password)
-   if (result.message === 'NOT_FOUND') return res.status(400).json({ message: `Wrong credentials` })
-   if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: `Failed to log in` })
+   if (result.message === 'NOT_FOUND') return res.status(400).json({ message: 'Wrong credentials' })
+   if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: 'Server failed to process log in' })
 
    return res.status(200).json(result.body)
 })

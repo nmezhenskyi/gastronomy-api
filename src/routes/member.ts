@@ -88,18 +88,18 @@ router.delete('/:id', authorize(Role.SUPERVISOR), async (req: AuthRequest, res: 
    if (req.member?.id === req.params.id) {
       const result = await MemberService.remove(req.params.id)
       if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Member account not found' })
-      if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to delete member account due to unexpected error' })
+      if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to delete member account due to unexpected error' })
       return res.status(200).json({ message: 'Member account has been deleted' })
    }
 
    const member = await MemberService.findOne({ id: req.params.id })
    if (member.message === 'NOT_FOUND') return res.status(404).json({ message: 'Member account not found' })
-   if (member.message === 'FAILED' || !member.body) return res.status(500).json({ message: `Failed to delete member account due to unexpected error` })
+   if (member.message === 'FAILED' || !member.body) return res.status(500).json({ message: 'Server failed to delete member account due to unexpected error' })
    if (member.body.role.toString() === Role.SUPERVISOR) return res.status(403).json({ message: 'Forbidden' })
 
    const result = await MemberService.remove(req.params.id)
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Member account not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Failed to delete member account due to unexpected error` })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to delete member account due to unexpected error' })
    return res.status(200).json({ message: 'Member account has been deleted' })
 })
 
@@ -140,7 +140,7 @@ async (req: AuthRequest<GetMembersQuery>, res: Response) => {
 
    const result = await MemberService.find(searchBy, paramToInt(offset), paramToInt(limit))
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No members were found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to find members' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find members' })
 
    return res.status(200).json(result.body)
 })
@@ -155,7 +155,7 @@ router.get('/members/:id', authorize(Role.SUPERVISOR),
 async (req: AuthRequest, res: Response) => {
    const result = await MemberService.findOne({ id: req.params.id })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Member not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to find member' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find member' })
 
    return res.status(200).json(result.body)
 })
@@ -175,7 +175,7 @@ async (req: AuthRequest<GetUsersQuery>, res: Response) => {
 
    const result = await UserService.find(searchBy, paramToInt(offset), paramToInt(limit))
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No users were found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to find users' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find users' })
 
    return res.status(200).json(result.body)
 })
@@ -190,7 +190,7 @@ router.get('/members/users/:id', authorize(Role.SUPERVISOR),
 async (req: AuthRequest, res: Response) => {
    const result = await UserService.findOne({ id: req.params.id })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to find user' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find user' })
 
    return res.status(200).json(result.body)
 })

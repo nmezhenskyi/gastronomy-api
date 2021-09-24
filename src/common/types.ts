@@ -1,4 +1,5 @@
 import { Request } from 'express'
+import * as core from 'express-serve-static-core'
 
 /**
  * Role reflects different authorization level.
@@ -16,7 +17,7 @@ export enum Role {
 /**
  * Authenticated request for *express* middleware.
  */
-export interface AuthRequest extends Request {
+export interface AuthRequest<Query = core.Query> extends Request<any, any, any, Query> {
    user?: {
       id: string
    },

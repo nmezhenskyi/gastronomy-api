@@ -20,16 +20,15 @@ body('password').notEmpty().isLength({ min: 6, max: 50 }),
 async (req, res) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Invalid data', errors: errors.array() })
+      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
    const result = await UserService.register({
       name: req.body.name,
       email: req.body.email,
       password: req.body.password
    })
-
    if (result.message === 'INVALID') return res.status(400).json({ message: 'User with this email already exists' })
-   if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: `Couldn't create user account` })
+   if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: 'Server failed to create user account' })
 
    res.cookie('userRefreshToken', result.body.refreshToken, { maxAge: 14 * 24 * 60 * 60 * 1000, httpOnly: true })
    return res.status(200).json(result.body)
@@ -47,12 +46,11 @@ body('password').notEmpty().isLength({ min: 6, max: 50 }),
 async (req, res) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Error: Invalid data', errors: errors.array() })
+      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
    const result = await UserService.login(req.body.email, req.body.password)
-
-   if (result.message === 'NOT_FOUND') return res.status(400).json({ message: `Wrong credentials` })
-   if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: `Couldn't log in` })
+   if (result.message === 'NOT_FOUND') return res.status(400).json({ message: 'Wrong credentials' })
+   if (result.message === 'FAILED' || !result.body) return res.status(500).json({ message: 'Server failed to process log in' })
 
    res.cookie('userRefreshToken', result.body.refreshToken, { maxAge: 14 * 24 * 60 * 60 * 1000, httpOnly: true })
    return res.status(200).json(result.body)
@@ -98,12 +96,9 @@ router.get('/refresh', async (req, res) => {
  * @access  Private (User)
  */
  router.get('/profile', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
-   if (!req.user) return res.status(404).json({ message: 'User not found' })
-
-   const result = await UserService.findOne({ id: req.user.id })
-
+   const result = await UserService.findOne({ id: req.user!.id })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Query failed' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to retrieve user account' })
    
    return res.status(200).json(result.body)
 })
@@ -124,21 +119,18 @@ body('photo').optional().isLength({ max: 255 }),
 async (req: AuthRequest, res: Response) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Error: Invalid data', errors: errors.array() })
-
-   if (!req.user) return res.status(404).json({ message: 'User not found' })
+      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
    const result = await UserService.update({
-      id: req.user.id,
+      id: req.user!.id,
       name: req.body.name,
       email: req.body.email,
       password: req.body.password,
       location: req.body.location,
       photo: req.body.photo
    })
-
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't update user profile` })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to update user account' })
 
    return res.status(200).json(result.body)
 })
@@ -150,12 +142,9 @@ async (req: AuthRequest, res: Response) => {
  * @access  Private (User)
  */
 router.delete('/profile', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
-   if (!req.user) return res.status(404).json({ message: 'User not found' })
-
-   const result = await UserService.remove(req.user.id)
-
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't delete user account` })
+   const result = await UserService.remove(req.user!.id)
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to delete user account' })
 
    return res.status(200).json({ message: 'User has been deleted' })
 })
@@ -168,9 +157,8 @@ router.delete('/profile', authorize(Role.USER), async (req: AuthRequest, res: Re
  */
 router.get('/saved/cocktails', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
    const result = await UserService.findSavedCocktails(req.user!.id)
-
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No saved cocktails were found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to find saved cocktails' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find saved cocktails' })
 
    return res.status(200).json(result.body)
 })
@@ -190,9 +178,8 @@ async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
    const result = await UserService.saveCocktail(req.user!.id, req.body.cocktailId)
-
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or user not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to save cocktail' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to save cocktail' })
 
    return res.status(200).json(result.body)
 })
@@ -207,9 +194,8 @@ router.delete('/saved/cocktails/:cocktailId', authorize(Role.USER), async (req: 
    if (!req.params.cocktailId) return res.status(404).json({ message: 'Cocktail not found' })
 
    const result = await UserService.removeSavedCocktail(req.user!.id, req.params.cocktailId)
-
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to remove saved cocktail' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to remove saved cocktail' })
 
    return res.status(200).json({ message: 'Cocktail has been removed from saved cocktails' })
 })
@@ -222,9 +208,8 @@ router.delete('/saved/cocktails/:cocktailId', authorize(Role.USER), async (req: 
  */
 router.get('/saved/meals', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
    const result = await UserService.findSavedMeals(req.user!.id)
-
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No saved meals were found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to find saved meals' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find saved meals' })
 
    return res.status(200).json(result.body)
 })
@@ -243,9 +228,8 @@ async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
 
    const result = await UserService.saveMeal(req.user!.id, req.body.mealId)
-
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Meal and/or user not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to save meal' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to save meal' })
 
    return res.status(200).json(result.body)
 })
@@ -260,9 +244,8 @@ router.delete('/saved/meals/:mealId', authorize(Role.USER), async (req: AuthRequ
    if (!req.params.mealId) return res.status(404).json({ message: 'Meal not found' })
 
    const result = await UserService.removeSavedMeal(req.user!.id, req.params.mealId)
-
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'User not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to remove saved meal' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to remove saved meal' })
 
    return res.status(200).json({ message: 'Meal has been removed from saved meals' })
 })
@@ -275,9 +258,8 @@ router.delete('/saved/meals/:mealId', authorize(Role.USER), async (req: AuthRequ
  */
  router.get('/cocktail-reviews', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
    const result = await ReviewService.findCocktailReviews({ userId: req.user!.id })
-
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No cocktail reviews were found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to find cocktail reviews' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find cocktail reviews' })
 
    return res.status(200).json(result.body)
 })
@@ -290,9 +272,8 @@ router.delete('/saved/meals/:mealId', authorize(Role.USER), async (req: AuthRequ
  */
 router.get('/meal-reviews', authorize(Role.USER), async (req: AuthRequest, res: Response) => {
    const result = await ReviewService.findMealReviews({ userId: req.user!.id })
-
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No meal reviews were found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Failed to find meal reviews' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find meal reviews' })
 
    return res.status(200).json(result.body)
 })

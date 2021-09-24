@@ -28,8 +28,9 @@ router.get('/', async (req: Request<unknown, unknown, unknown, GetMealsQuery>, r
 
    const result = await MealService.find(searchBy, paramToInt(offset), paramToInt(limit))
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Query failed' })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Nothing found' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No meals were found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find meals' })
+   
 
    return res.status(200).json(result.body)
 })
@@ -43,8 +44,8 @@ router.get('/', async (req: Request<unknown, unknown, unknown, GetMealsQuery>, r
 router.get('/:id', async (req, res) => {
    const result = await MealService.findOne({ id: req.params.id })
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Query failed' })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Meal not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find meal' })
 
    return res.status(200).json(result.body)
 })
@@ -78,7 +79,7 @@ async (req: AuthRequest, res: Response) => {
       notesOnTaste: req.body.notesOnTaste
    })
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't create meal` })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to create new meal' })
 
    return res.status(200).json(result.body)
 })
@@ -115,8 +116,8 @@ async (req: AuthRequest, res: Response) => {
       notesOnTaste: req.body.notesOnTaste
    })
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't update the meal` })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Meal not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to update meal' })
 
    return res.status(200).json(result)
 })
@@ -155,8 +156,8 @@ async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: 'Ingredient id or category and name are missing in the request body' })
    }
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't add ingredient to meal` })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Meal and/or ingredient not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to add ingredient to meal' })
 
    return res.status(200).json(result.body)
 })
@@ -171,8 +172,8 @@ router.delete('/:id/ingredients/:ingredientId', authorize([Role.CREATOR, Role.SU
 async (req: AuthRequest, res: Response) => {
    const result = await MealService.removeIngredient(req.params.id, req.params.ingredientId)
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't remove ingredient from meal` })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Meal and/or ingredient not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to remove ingredient from meal' })
 
    return res.status(200).json({ message: 'Ingredient has been removed from meal' })
 })
@@ -187,8 +188,8 @@ router.delete('/:id', authorize([Role.CREATOR, Role.SUPERVISOR]),
 async (req: AuthRequest, res: Response) => {
    const result = await MealService.remove(req.params.id)
 
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't delete meal` })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Meal not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to delete meal' })
 
    return res.status(200).json({ message: 'Meal has been deleted' })
 })
@@ -202,8 +203,8 @@ async (req: AuthRequest, res: Response) => {
 router.get('/:id/reviews', async (req, res) => {
    const foundReviews = await ReviewService.findMealReviews({ mealId: req.params.id })
 
-   if (foundReviews.message === 'NOT_FOUND') return res.status(404).json({ message: 'No reviews found' })
-   if (foundReviews.message === 'FAILED') return res.status(500).json({ message: 'Find reviews query failed' })
+   if (foundReviews.message === 'NOT_FOUND') return res.status(404).json({ message: 'No reviews were found' })
+   if (foundReviews.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find reviews' })
 
    return res.status(200).json(foundReviews.body)
 })
@@ -229,7 +230,7 @@ async (req: AuthRequest, res: Response) => {
 
    if (savedReview.message === 'INVALID') return res.status(400).json({ message: 'Invalid data in the request body' })
    if (savedReview.message === 'NOT_FOUND') return res.status(404).json({ message: 'Meal and/or user account not found' })
-   if (savedReview.message === 'FAILED') return res.status(500).json({ message: 'Failed to create meal review' })
+   if (savedReview.message === 'FAILED') return res.status(500).json({ message: 'Server failed to create meal review' })
 
    return res.status(200).json(savedReview.body)
 })
@@ -254,7 +255,7 @@ async (req: AuthRequest, res: Response) => {
 
    if (updatedReview.message === 'INVALID') return res.status(400).json({ message: 'Invalid data in the request body' })
    if (updatedReview.message === 'NOT_FOUND') return res.status(404).json({ message: 'Meal and/or user account not found' })
-   if (updatedReview.message === 'FAILED') return res.status(500).json({ message: 'Failed to update meal review' })
+   if (updatedReview.message === 'FAILED') return res.status(500).json({ message: 'Server failed to update meal review' })
 
    return res.status(200).json(updatedReview.body)
 })

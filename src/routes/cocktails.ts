@@ -25,9 +25,8 @@ router.get('/', async (req: Request<unknown, unknown, unknown, GetCocktailsQuery
    const { offset, limit } = req.query
 
    const result = await CocktailService.find({}, paramToInt(offset), paramToInt(limit))
-
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Query failed' })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Nothing found' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No cocktails were found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find cocktails' })
 
    return res.status(200).json(result.body)
 })
@@ -40,9 +39,8 @@ router.get('/', async (req: Request<unknown, unknown, unknown, GetCocktailsQuery
  */
 router.get('/:id', async (req, res) => {
    const result = await CocktailService.findOne({ id: req.params.id })
-
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Query failed` })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find cocktail' })
 
    return res.status(200).json(result.body)
 })
@@ -55,11 +53,11 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/', authorize([Role.CREATOR, Role.SUPERVISOR]),
 body('name').notEmpty().isLength({ max: 100 }).trim(),
-body('description').isLength({ max: 5000 }).trim(),
+body('description').optional().isLength({ max: 5000 }).trim(),
 body('method').notEmpty().isLength({ max: 3000 }).trim(),
-body('notesOnIngredients').isLength({ max: 2000 }).trim(),
-body('notesOnExecution').isLength({ max: 2000 }).trim(),
-body('notesOnTaste').isLength({ max: 1000 }).trim(),
+body('notesOnIngredients').optional().isLength({ max: 2000 }).trim(),
+body('notesOnExecution').optional().isLength({ max: 2000 }).trim(),
+body('notesOnTaste').optional().isLength({ max: 1000 }).trim(),
 async (req: AuthRequest, res: Response) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
@@ -73,8 +71,7 @@ async (req: AuthRequest, res: Response) => {
       notesOnExecution: req.body.notesOnExecution,
       notesOnTaste: req.body.notesOnTaste
    })
-
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't create cocktail` })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to create cocktail' })
 
    return res.status(200).json(result.body)
 })
@@ -86,12 +83,12 @@ async (req: AuthRequest, res: Response) => {
  * @access  Private (Creator, Supervisor)
  */
 router.put('/:id', authorize([Role.CREATOR, Role.SUPERVISOR]),
-body('name').isLength({ max: 100 }).trim(),
-body('description').isLength({ max: 5000 }).trim(),
-body('method').isLength({ max: 3000 }).trim(),
-body('notesOnIngredients').isLength({ max: 2000 }).trim(),
-body('notesOnExecution').isLength({ max: 2000 }).trim(),
-body('notesOnTaste').isLength({ max: 1000 }).trim(),
+body('name').optional().isLength({ max: 100 }).trim(),
+body('description').optional().isLength({ max: 5000 }).trim(),
+body('method').optional().isLength({ max: 3000 }).trim(),
+body('notesOnIngredients').optional().isLength({ max: 2000 }).trim(),
+body('notesOnExecution').optional().isLength({ max: 2000 }).trim(),
+body('notesOnTaste').optional().isLength({ max: 1000 }).trim(),
 async (req: AuthRequest, res: Response) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
@@ -108,9 +105,8 @@ async (req: AuthRequest, res: Response) => {
       notesOnExecution: req.body.notesOnExecution,
       notesOnTaste: req.body.notesOnTaste
    })
-
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't update cocktail` })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail found' })
+   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to update cocktail' })
 
    return res.status(200).json(result)
 })
@@ -149,8 +145,8 @@ async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: 'Ingredient id or category and name are missing in the request body' })
    }
    
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't add ingredient to  cocktail` })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or ingredient not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to add ingredient to cocktail' })
 
    return res.status(200).json(result.body)
 })
@@ -164,9 +160,8 @@ async (req: AuthRequest, res: Response) => {
 router.delete('/:id/ingredients/:ingredientId', authorize([Role.CREATOR, Role.SUPERVISOR]),
 async (req: AuthRequest, res: Response) => {
    const result = await CocktailService.removeIngredient(req.params.id, req.params.ingredientId)
-
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't remove ingredient from cocktail` })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or ingredient not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to remove ingredient from cocktail' })
 
    return res.status(200).json({ message: 'Ingredient has been removed from the cocktail' })
 })
@@ -180,9 +175,8 @@ async (req: AuthRequest, res: Response) => {
 router.delete('/:id', authorize([Role.CREATOR, Role.SUPERVISOR]),
 async (req: AuthRequest, res: Response) => {
    const result = await CocktailService.remove(req.params.id)
-
-   if (result.message === 'FAILED') return res.status(500).json({ message: `Couldn't delete cocktail` })
    if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail not found' })
+   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to delete cocktail' })
 
    return res.status(200).json({ message: 'Cocktail has been deleted' })
 })
@@ -195,9 +189,8 @@ async (req: AuthRequest, res: Response) => {
  */
 router.get('/:id/reviews', async (req, res) => {
    const foundReviews = await ReviewService.findCocktailReviews({ cocktailId: req.params.id })
-
-   if (foundReviews.message === 'NOT_FOUND') return res.status(404).json({ message: 'No reviews found' })
-   if (foundReviews.message === 'FAILED') return res.status(500).json({ message: 'Find reviews query failed' })
+   if (foundReviews.message === 'NOT_FOUND') return res.status(404).json({ message: 'No cocktail reviews were found' })
+   if (foundReviews.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find cocktail reviews' })
 
    return res.status(200).json(foundReviews.body)
 })
@@ -220,10 +213,9 @@ async (req: AuthRequest, res: Response) => {
       rating: req.body.rating,
       review: req.body.review
    })
-
    if (savedReview.message === 'INVALID') return res.status(400).json({ message: 'Invalid data in the request body' })
    if (savedReview.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or user account not found' })
-   if (savedReview.message === 'FAILED') return res.status(500).json({ message: 'Failed to create cocktail review' })
+   if (savedReview.message === 'FAILED') return res.status(500).json({ message: 'Server failed to create cocktail review' })
 
    return res.status(200).json(savedReview.body)
 })
@@ -235,7 +227,8 @@ async (req: AuthRequest, res: Response) => {
  * @access  Private (User)
  */
 router.put('/:id/reviews', authorize(Role.USER),
-body('review').isLength({ max: 2000 }).trim(),
+body('rating').optional().isInt({ min: 0, max: 5 }),
+body('review').optional().isLength({ max: 2000 }).trim(),
 async (req: AuthRequest, res: Response) => {
    const errors = validationResult(req)
    if (!errors.isEmpty())
@@ -245,10 +238,9 @@ async (req: AuthRequest, res: Response) => {
       rating: req.body.rating,
       review: req.body.review
    })
-
    if (updatedReview.message === 'INVALID') return res.status(400).json({ message: 'Invalid data in the request body' })
    if (updatedReview.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or user account not found' })
-   if (updatedReview.message === 'FAILED') return res.status(500).json({ message: 'Failed to update cocktail review' })
+   if (updatedReview.message === 'FAILED') return res.status(500).json({ message: 'Server failed to update cocktail review' })
 
    return res.status(200).json(updatedReview.body)
 })

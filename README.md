@@ -12,6 +12,7 @@ The project is currently in active development stage. There is no stable release
 * PostgreSQL (v12 and higher recommended)
 ### Install:
 * Clone the repository to your local environment or download the code.
+* cd to /api directory.
 * Run `npm install` command.
 * Run `npm build` command.
 ### Set up configuration files:

@@ -4,7 +4,7 @@ import config from 'config'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { createConnection, ConnectionOptions } from 'typeorm'
-import { PORT, PROD } from './common/constants'
+import { PORT, PROD, OPTIONS } from './common/constants'
 import { logger } from './common/logger'
 import rootRoute from './routes/root'
 import ingredientsRoute from './routes/ingredients'
@@ -30,7 +30,7 @@ const start = async () => {
          entities: config.get('typeorm.entities'),
          migrations: config.get('typeorm.migrations'),
          synchronize: !PROD,
-         logging: !PROD
+         logging: OPTIONS.debug || OPTIONS.sqlLogs
       } as ConnectionOptions)
 
       // Server Configuration:

@@ -15,7 +15,6 @@ export const logger = winston.createLogger({
       format.splat(),
       format.simple()
    ),
-   defaultMeta: { api: 'index' },
    transports: [
       new transports.File({ filename: path.join(LOG_DIR, 'error.log'), level: 'error' }),
       new transports.File({ filename: path.join(LOG_DIR, 'global.log') })
@@ -25,6 +24,9 @@ export const logger = winston.createLogger({
 // Also log to the console if not in production mode
 if (!PROD) {
    logger.add(new winston.transports.Console({
-      format: format.simple()
+      format: format.combine(
+         format.colorize({ all: true, colors: { info: 'yellow', error: 'red', debug: 'blue' } }),
+         format.simple()
+      )
    }))
 }

@@ -36,22 +36,22 @@ export class User {
       length: 100,
       nullable: true
    })
-   location: string | null
+   location!: string | null
 
    @Column({
       type: 'varchar',
       length: 255,
       nullable: true
    })
-   photo: string | null
+   photo!: string | null
 
    @ManyToMany(() => Cocktail)
    @JoinTable({ name: 'user_saved_cocktail' })
-   savedCocktails: Cocktail[]
+   savedCocktails!: Cocktail[]
 
    @ManyToMany(() => Meal)
    @JoinTable({ name: 'user_saved_meal' })
-   savedMeals: Meal[]
+   savedMeals!: Meal[]
 
    @OneToMany(() => CocktailReview, cocktailReview => cocktailReview.user)
    cocktailReviews!: CocktailReview[]

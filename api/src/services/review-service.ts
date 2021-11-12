@@ -1,11 +1,10 @@
 import { getRepository } from 'typeorm'
 import { MealReview } from '../models/meal-review'
 import { CocktailReview } from '../models/cocktail-review'
-import { ServiceResponse } from './service-response'
+import { ServiceResponse } from './utils/service-response'
 import { MealService } from './meal-service'
 import { CocktailService } from './cocktail-service'
 import { UserService } from './user-service'
-import { logger } from '../common/logger'
 
 export const ReviewService = {
    /**
@@ -45,8 +44,7 @@ export const ReviewService = {
             body: saved
          }
       }
-      catch (err) {
-         logger.error(`ReviewService.createMealReview(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -82,8 +80,7 @@ export const ReviewService = {
             body: saved
          }
       }
-      catch (err) {
-         logger.error(`ReviewService.updateMealReview(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -109,8 +106,7 @@ export const ReviewService = {
             body: null
          }
       }
-      catch (err) {
-         logger.error(`ReviewService.removeMealReview(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -134,8 +130,7 @@ export const ReviewService = {
             body: found
          }
       }
-      catch (err) {
-         logger.error(`ReviewService.findMealReview(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -165,8 +160,7 @@ export const ReviewService = {
             body: found
          }
       }
-      catch (err) {
-         logger.error(`ReviewService.findMealReviews(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -208,8 +202,7 @@ export const ReviewService = {
             body: saved
          }
       }
-      catch (err) {
-         logger.error(`ReviewService.createCocktailReview(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -245,8 +238,7 @@ export const ReviewService = {
             body: saved
          }
       }
-      catch (err) {
-         logger.error(`ReviewService.updateCocktailReview(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -272,8 +264,7 @@ export const ReviewService = {
             body: null
          }
       }
-      catch (err) {
-         logger.error(`ReviewService.removeCocktailReview(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -297,8 +288,7 @@ export const ReviewService = {
             body: found
          }
       }
-      catch (err) {
-         logger.error(`ReviewService.findCocktailReview(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -328,8 +318,7 @@ export const ReviewService = {
             body: found
          }
       }
-      catch (err) {
-         logger.error(`ReviewService.findCocktailReviews(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    }

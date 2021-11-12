@@ -1,7 +1,7 @@
 import { getRepository, Like } from 'typeorm'
 import { Meal } from '../models/meal'
 import { MealToIngredient } from '../models/meal-to-ingredient'
-import { ServiceResponse } from './service-response'
+import { ServiceResponse } from './utils/service-response'
 import { IngredientService } from './ingredient-service'
 
 export const MealService = {
@@ -38,7 +38,7 @@ export const MealService = {
             body: found
          }
       }
-      catch  (err) {
+      catch  (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -77,7 +77,7 @@ export const MealService = {
             body: found
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -117,7 +117,7 @@ export const MealService = {
             body: saved
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -161,7 +161,7 @@ export const MealService = {
             body: saved
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -207,7 +207,7 @@ export const MealService = {
             body: saved
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -235,7 +235,7 @@ export const MealService = {
             body: null
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -262,7 +262,7 @@ export const MealService = {
             body: null
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    }

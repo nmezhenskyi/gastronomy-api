@@ -1,7 +1,7 @@
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import config from 'config'
 import { getRepository, LessThan } from 'typeorm'
-import { ServiceResponse } from './service-response'
+import { ServiceResponse } from './utils/service-response'
 import { UserService } from './user-service'
 import { UserRefreshToken } from '../models/user-refresh-token'
 import { TokenPair } from '../common/types'
@@ -61,7 +61,7 @@ export const TokenService = {
 
          return userData
       }
-      catch (err) {
+      catch (err: unknown) {
          return null
       }
    },
@@ -80,7 +80,7 @@ export const TokenService = {
 
          return userData
       }
-      catch (err) {
+      catch (err: unknown) {
          return null
       }
    },
@@ -132,7 +132,7 @@ export const TokenService = {
             body: saved
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -159,7 +159,7 @@ export const TokenService = {
             body: null
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -184,7 +184,7 @@ export const TokenService = {
             body: tokenRecord
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -209,8 +209,7 @@ export const TokenService = {
             await repository.remove(token)
          }
       }
-      catch (err) {
-         console.error(err)
+      catch (err: unknown) {
          return
       }
    }

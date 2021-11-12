@@ -1,11 +1,11 @@
-import winston, { format, transports } from 'winston'
+import { createLogger, format, transports } from 'winston'
 import path from 'path'
 import { PROD, LOG_DIR } from './constants'
 
 /**
  * Main logger instance throughout the API.
  */
-export const logger = winston.createLogger({
+export const logger = createLogger({
    level: 'info',
    format: format.combine(
       format.timestamp({
@@ -23,7 +23,7 @@ export const logger = winston.createLogger({
 
 // Also log to the console if not in production mode
 if (!PROD) {
-   logger.add(new winston.transports.Console({
+   logger.add(new transports.Console({
       format: format.combine(
          format.colorize({ all: true, colors: { info: 'yellow', error: 'red', debug: 'blue' } }),
          format.simple()

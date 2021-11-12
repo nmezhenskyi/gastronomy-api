@@ -1,7 +1,7 @@
 import { getRepository } from 'typeorm'
 import { Cocktail } from '../models/cocktail'
 import { CocktailToIngredient } from '../models/cocktail-to-ingredient'
-import { ServiceResponse } from './service-response'
+import { ServiceResponse } from './utils/service-response'
 import { IngredientService } from './ingredient-service'
 
 export const CocktailService = {
@@ -33,7 +33,7 @@ export const CocktailService = {
             body: found,
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -72,7 +72,7 @@ export const CocktailService = {
             body: found
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -110,7 +110,7 @@ export const CocktailService = {
             body: saved,
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -152,7 +152,7 @@ export const CocktailService = {
             body: saved,
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -198,7 +198,7 @@ export const CocktailService = {
             body: saved
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -226,7 +226,7 @@ export const CocktailService = {
             body: null
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -253,7 +253,7 @@ export const CocktailService = {
             body: null
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    }

@@ -24,14 +24,14 @@ export class Meal {
       type: 'text',
       nullable: true
    })
-   description: string | null
+   description!: string | null
 
    @Column({
       type: 'varchar',
       length: 20,
       nullable: true
    })
-   cuisine: string | null
+   cuisine!: string | null
 
    @Column('text')
    instructions!: string
@@ -40,19 +40,19 @@ export class Meal {
       type: 'text',
       nullable: true
    })
-   notesOnIngredients: string | null
+   notesOnIngredients!: string | null
 
    @Column({
       type: 'text',
       nullable: true
    })
-   notesOnExecution: string | null
+   notesOnExecution!: string | null
 
    @Column({
       type: 'text',
       nullable: true
    })
-   notesOnTaste: string | null
+   notesOnTaste!: string | null
 
    @OneToMany(() => MealToIngredient, mealToIngredient => mealToIngredient.meal)
    ingredients!: MealToIngredient[]

@@ -4,9 +4,9 @@ import * as core from 'express-serve-static-core'
 /**
  * Role reflects different authorization level.
  * 
- * - ```SUPERVISOR``` - member role with the highest access level
- * - ```CREATOR``` - member role with the full CRUD access to *cocktails*, *meals*, and *ingredients* collections
- * - ```USER``` - user role
+ * - `SUPERVISOR` - member role with the highest access level
+ * - `CREATOR` - member role with the full CRUD access to *cocktails*, *meals*, and *ingredients* collections
+ * - `USER` - user role
  */
 export enum Role {
    SUPERVISOR = 'Supervisor',

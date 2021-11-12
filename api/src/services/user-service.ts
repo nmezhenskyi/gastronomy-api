@@ -1,12 +1,11 @@
 import { getRepository } from 'typeorm'
 import bcrypt from 'bcrypt'
 import { User } from '../models/user'
-import { ServiceResponse } from './service-response'
+import { ServiceResponse } from './utils/service-response'
 import { TokenService } from './token-service'
 import { TokenPair } from '../common/types'
 import { CocktailService } from './cocktail-service'
 import { MealService } from './meal-service'
-import { logger } from '../common/logger'
 
 interface UserWithTokenPair {
    user: User,
@@ -43,8 +42,7 @@ export const UserService = {
             body: users
          }
       }
-      catch (err) {
-         logger.error(`UserService.find(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -72,8 +70,7 @@ export const UserService = {
             body: user
          }
       }
-      catch (err) {
-         logger.error(`UserService.findOne(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -103,8 +100,7 @@ export const UserService = {
             body: { ...user, password: '' }
          }
       }
-      catch (err) {
-         logger.error(`UserService.findByCredentials(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -140,8 +136,7 @@ export const UserService = {
             body: { ...saved, password: '' }
          }
       }
-      catch (err) {
-         logger.error(`UserService.create(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -226,7 +221,7 @@ export const UserService = {
             body: tokenPair
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -284,8 +279,7 @@ export const UserService = {
             body: { ...saved, password: '' }
          }
       }
-      catch (err) {
-         logger.error(`UserService.update(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -312,8 +306,7 @@ export const UserService = {
             body: null
          }
       }
-      catch (err) {
-         logger.error(`UserService.remove(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -348,8 +341,7 @@ export const UserService = {
             body: saved
          }
       }
-      catch (err) {
-         logger.error(`UserService.saveCocktail(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -376,8 +368,7 @@ export const UserService = {
             body: user
          }
       }
-      catch (err) {
-         logger.error(`UserService.findSavedCocktails(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -409,8 +400,7 @@ export const UserService = {
             body: saved
          }
       }
-      catch (err) {
-         logger.error(`UserService.removeSavedCocktail(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -445,8 +435,7 @@ export const UserService = {
             body: saved
          }
       }
-      catch (err) {
-         logger.error(`UserService.saveMeal(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -473,8 +462,7 @@ export const UserService = {
             body: user
          }
       }
-      catch (err) {
-         logger.error(`UserService.findSavedMeals(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -506,8 +494,7 @@ export const UserService = {
             body: saved
          }
       }
-      catch (err) {
-         logger.error(`UserService.removeSavedMeal(): ${err}`)
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    }

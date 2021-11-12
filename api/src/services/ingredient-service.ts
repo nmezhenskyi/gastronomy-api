@@ -1,6 +1,6 @@
 import { getRepository } from 'typeorm'
 import { Ingredient } from '../models/ingredient'
-import { ServiceResponse } from './service-response'
+import { ServiceResponse } from './utils/service-response'
 
 export const IngredientService = {
    /**
@@ -30,7 +30,7 @@ export const IngredientService = {
             body: found
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -55,7 +55,7 @@ export const IngredientService = {
             body: found
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -83,7 +83,7 @@ export const IngredientService = {
             body: saved
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -114,7 +114,7 @@ export const IngredientService = {
             body: saved
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -141,7 +141,7 @@ export const IngredientService = {
             body: null
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    }

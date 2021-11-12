@@ -2,13 +2,14 @@ import 'reflect-metadata'
 import config from 'config'
 import { createConnection, ConnectionOptions } from 'typeorm'
 import { PROD } from '../common/constants'
+import { logger } from '../common/logger'
 import { setSupervisor } from './set-supervisor'
 
-/**
- * This file should be executed as a deployment step before the first launch.
- */
 
-const start = async () => {
+
+// This file should be executed as a deployment step before the first launch.
+
+const main = async () => {
    try {
       const connection = await createConnection({
          type: config.get('database.type'),
@@ -27,11 +28,11 @@ const start = async () => {
 
       await connection.close()
 
-      console.log('Deployment process have been completed')
+      logger.info('Deployment process have been completed')
    }
-   catch (err) {
-      console.error(err)
+   catch (err: unknown) {
+      logger.error(err)
    }
 }
 
-start()
+main()

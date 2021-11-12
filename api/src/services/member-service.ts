@@ -1,7 +1,7 @@
 import { getRepository } from 'typeorm'
 import bcrypt from 'bcrypt'
 import { Member, MemberRole } from '../models/member'
-import { ServiceResponse } from './service-response'
+import { ServiceResponse } from './utils/service-response'
 import { TokenService } from './token-service'
 
 export const MemberService = {
@@ -37,7 +37,7 @@ export const MemberService = {
             body: members
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -65,7 +65,7 @@ export const MemberService = {
             body: member
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -95,7 +95,7 @@ export const MemberService = {
             body: { ...member, password: '' }
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -136,7 +136,7 @@ export const MemberService = {
             body: { ...saved, password: '' }
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -201,7 +201,7 @@ export const MemberService = {
             body: { ...saved, password: '' }
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    },
@@ -228,7 +228,7 @@ export const MemberService = {
             body: null
          }
       }
-      catch (err) {
+      catch (err: unknown) {
          return { success: false, message: 'FAILED' }
       }
    }

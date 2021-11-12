@@ -12,10 +12,6 @@ Features include:
 * Admins can register creator accounts.
 * Admins can oversee the service as a whole.
 
-## Status
-
-The project is currently in active development stage. There is no stable release version available as of yet.
-
 ## Project Details
 
 The project is divided into two parts: __api__ and __web client__.

@@ -4,7 +4,7 @@
 type = "postgres"
 host = "localhost"
 port = "5432"
-name = "gastronomy"
+name = "gastronomy-test"
 username = "pg-user"
 password = "pg-user"
 

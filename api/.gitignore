@@ -2,3 +2,4 @@
 /node_modules
 /.deployment
 /logs
+/config/production.toml

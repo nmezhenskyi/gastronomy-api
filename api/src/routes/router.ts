@@ -1,20 +1,21 @@
 import express from 'express'
-import ingredientsRouter from './ingredients'
-import cocktailsRouter from './cocktails'
-import mealsRouter from './meals'
-import userRouter from './user'
-import memberRouter from './member'
 import { MainController } from '../controllers/main-controller'
+import { router as ingredientsRouter } from './ingredients'
+import { router as cocktailsRouter } from './cocktails'
+import { router as mealsRouter } from './meals'
+import { router as userRouter } from './user'
+import { router as memberRouter } from './member'
 
 /**
  * Provides routing for the whole API.
  */
 export const router = express.Router()
 
-// Main:
+// Main end-points:
 router.get('/', MainController.root)
 router.get('/ping', MainController.ping)
 
+// Resource end-points:
 router.use('/ingredients', ingredientsRouter)
 router.use('/cocktails', cocktailsRouter)
 router.use('/meals', mealsRouter)

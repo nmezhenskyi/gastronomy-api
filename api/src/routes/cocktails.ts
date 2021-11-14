@@ -6,7 +6,7 @@ import { paramToInt } from '../common/utils'
 import { authorize } from '../middleware/authorize'
 import { AuthRequest, Pagination, Role } from '../common/types'
 
-const router = express.Router()
+export const router = express.Router()
 
 /**
  * Represents query parameters for the ```GET /cocktails``` request.
@@ -244,5 +244,3 @@ async (req: AuthRequest, res: Response) => {
 
    return res.status(200).json(updatedReview.body)
 })
-
-export default router

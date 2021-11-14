@@ -172,22 +172,21 @@ export const CocktailService = {
          const cocktail = await cocktailRepository.findOne({ id: cocktailId })
          if (!cocktail) return { success: false, message: 'NOT_FOUND' }
 
-         let ingredientResponse: ServiceResponse<any>
+         let ingredientToAdd
 
          // Existing ingredient id is passed
-         if (typeof ingredient === 'string')
-            ingredientResponse = await IngredientService.findOne({ id: ingredient })
+         if (typeof ingredient === 'string') {
+            ingredientToAdd = await IngredientService.findOne({ id: ingredient })
+         }
          // New ingredient object is passed
-         else
-            ingredientResponse = await IngredientService.create({ category: ingredient.category, name: ingredient.name, description: ingredient.description})
-
-         if (ingredientResponse.message === 'FAILED') return { success: false, message: 'FAILED' }
-         if (ingredientResponse.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
+         else {
+            ingredientToAdd = await IngredientService.create({ category: ingredient.category, name: ingredient.name, description: ingredient.description})
+         }
 
          const cocktailToIngredientRepository = getRepository(CocktailToIngredient)
          const cocktailToIngredient = new CocktailToIngredient()
          cocktailToIngredient.cocktail = cocktail
-         cocktailToIngredient.ingredient = ingredientResponse.body
+         cocktailToIngredient.ingredient = ingredientToAdd
          cocktailToIngredient.amount = amount
 
          const saved = await cocktailToIngredientRepository.save(cocktailToIngredient)

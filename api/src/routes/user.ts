@@ -5,7 +5,7 @@ import { ReviewService } from '../services/review-service'
 import { authorize } from '../middleware/authorize'
 import { AuthRequest, Role } from '../common/types'
 
-const router = express.Router()
+export const router = express.Router()
 
 /**
  * Register new user account.
@@ -277,5 +277,3 @@ router.get('/meal-reviews', authorize(Role.USER), async (req: AuthRequest, res: 
 
    return res.status(200).json(result.body)
 })
-
-export default router

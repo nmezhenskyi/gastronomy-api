@@ -181,22 +181,21 @@ export const MealService = {
          const meal = await mealRepository.findOne(mealId)
          if (!meal) return { success: false, message: 'NOT_FOUND' }
 
-         let ingredientResponse: ServiceResponse<any>
+         let ingredientToAdd
 
          // Existing ingredient id is passed
-         if (typeof ingredient === 'string')
-            ingredientResponse = await IngredientService.findOne({ id: ingredient })
+         if (typeof ingredient === 'string') {
+            ingredientToAdd = await IngredientService.findOne({ id: ingredient })
+         }   
          // New ingredient object is passed
-         else
-            ingredientResponse = await IngredientService.create({ category: ingredient.category, name: ingredient.name, description: ingredient.description})
-
-         if (ingredientResponse.message === 'FAILED') return { success: false, message: 'FAILED' }
-         if (ingredientResponse.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
+         else {
+            ingredientToAdd = await IngredientService.create({ category: ingredient.category, name: ingredient.name, description: ingredient.description})
+         }
 
          const mealToIngredientRepository = getRepository(MealToIngredient)
          const mealToIngredient = new MealToIngredient()
          mealToIngredient.meal = meal
-         mealToIngredient.ingredient = ingredientResponse.body
+         mealToIngredient.ingredient = ingredientToAdd
          mealToIngredient.amount = amount
 
          const saved = await mealToIngredientRepository.save(mealToIngredient)

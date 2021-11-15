@@ -1,49 +1,27 @@
-import express, { Request, Response } from 'express'
+import express, { Response } from 'express'
 import { body, validationResult } from 'express-validator'
-import { CocktailService } from '../services/cocktail-service'
 import { ReviewService } from '../services/review-service'
-import { paramToInt } from '../common/utils'
 import { authorize } from '../middleware/authorize'
-import { AuthRequest, Pagination, Role } from '../common/types'
+import { AuthRequest, Role } from '../common/types'
+import { CocktailController } from '../controllers/cocktail-controller'
 
 export const router = express.Router()
 
 /**
- * Represents query parameters for the ```GET /cocktails``` request.
- */
-interface GetCocktailsQuery extends Pagination {
-   name?: string
-}
-
-/**
- * Retrieve cocktails.
+ * Get all cocktails.
  * 
  * @route   GET /cocktails
  * @access  Public
  */
-router.get('/', async (req: Request<unknown, unknown, unknown, GetCocktailsQuery>, res) => {
-   const { offset, limit } = req.query
-
-   const result = await CocktailService.find({}, paramToInt(offset), paramToInt(limit))
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'No cocktails were found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find cocktails' })
-
-   return res.status(200).json(result.body)
-})
+router.get('/', CocktailController.getAll)
 
 /**
- * Retrieve the cocktail by id.
+ * Get one cocktail by id.
  * 
  * @route   GET /cocktails/:id
  * @access  Public
  */
-router.get('/:id', async (req, res) => {
-   const result = await CocktailService.findOne({ id: req.params.id })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find cocktail' })
-
-   return res.status(200).json(result.body)
-})
+router.get('/:id', CocktailController.getById)
 
 /**
  * Create new cocktail.
@@ -51,30 +29,15 @@ router.get('/:id', async (req, res) => {
  * @route   POST /cocktails
  * @access  Private (Creator, Supervisor)
  */
-router.post('/', authorize([Role.CREATOR, Role.SUPERVISOR]),
-body('name').notEmpty().isLength({ max: 100 }).trim(),
-body('description').optional().isLength({ max: 5000 }).trim(),
-body('method').notEmpty().isLength({ max: 3000 }).trim(),
-body('notesOnIngredients').optional().isLength({ max: 2000 }).trim(),
-body('notesOnExecution').optional().isLength({ max: 2000 }).trim(),
-body('notesOnTaste').optional().isLength({ max: 1000 }).trim(),
-async (req: AuthRequest, res: Response) => {
-   const errors = validationResult(req)
-   if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
-
-   const result = await CocktailService.create({
-      name: req.body.name,
-      description: req.body.description,
-      method: req.body.method,
-      notesOnIngredients: req.body.notesOnIngredients,
-      notesOnExecution: req.body.notesOnExecution,
-      notesOnTaste: req.body.notesOnTaste
-   })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to create cocktail' })
-
-   return res.status(200).json(result.body)
-})
+router.post('/',
+   authorize([Role.CREATOR, Role.SUPERVISOR]),
+   body('name').notEmpty().isLength({ max: 100 }).trim(),
+   body('description').optional().isLength({ max: 5000 }).trim(),
+   body('method').notEmpty().isLength({ max: 3000 }).trim(),
+   body('notesOnIngredients').optional().isLength({ max: 2000 }).trim(),
+   body('notesOnExecution').optional().isLength({ max: 2000 }).trim(),
+   body('notesOnTaste').optional().isLength({ max: 1000 }).trim(),
+   CocktailController.create)
 
 /**
  * Update cocktail by id.
@@ -82,34 +45,15 @@ async (req: AuthRequest, res: Response) => {
  * @route   PUT /cocktails/:id
  * @access  Private (Creator, Supervisor)
  */
-router.put('/:id', authorize([Role.CREATOR, Role.SUPERVISOR]),
-body('name').optional().isLength({ max: 100 }).trim(),
-body('description').optional().isLength({ max: 5000 }).trim(),
-body('method').optional().isLength({ max: 3000 }).trim(),
-body('notesOnIngredients').optional().isLength({ max: 2000 }).trim(),
-body('notesOnExecution').optional().isLength({ max: 2000 }).trim(),
-body('notesOnTaste').optional().isLength({ max: 1000 }).trim(),
-async (req: AuthRequest, res: Response) => {
-   const errors = validationResult(req)
-   if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
-
-   if (!req.params || !req.params.id) return res.status(400).json({ message: 'Cocktail id is missing in the request URI' })
-
-   const result = await CocktailService.update({
-      id: req.params.id,
-      name: req.body.name,
-      description: req.body.description,
-      method: req.body.method,
-      notesOnIngredients: req.body.notesOnIngredients,
-      notesOnExecution: req.body.notesOnExecution,
-      notesOnTaste: req.body.notesOnTaste
-   })
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to update cocktail' })
-
-   return res.status(200).json(result)
-})
+router.put('/:id',
+   authorize([Role.CREATOR, Role.SUPERVISOR]),
+   body('name').optional().isLength({ max: 100 }).trim(),
+   body('description').optional().isLength({ max: 5000 }).trim(),
+   body('method').optional().isLength({ max: 3000 }).trim(),
+   body('notesOnIngredients').optional().isLength({ max: 2000 }).trim(),
+   body('notesOnExecution').optional().isLength({ max: 2000 }).trim(),
+   body('notesOnTaste').optional().isLength({ max: 1000 }).trim(),
+   CocktailController.updateById)
 
 /**
  * Add ingredient to cocktail.
@@ -117,39 +61,14 @@ async (req: AuthRequest, res: Response) => {
  * @route   PUT /cocktails/:id/ingredients
  * @access  Private (Creator, Supervisor)
  */
-router.put('/:id/ingredients', authorize([Role.CREATOR, Role.SUPERVISOR]),
-body('ingredientId').isLength({ max: 36 }),
-body('category').isLength({ max: 150 }).trim(),
-body('name').isLength({ max: 150 }).trim(),
-body('description').isLength({ max: 5000 }).trim(),
-body('amount').notEmpty().isLength({ max: 20 }).trim(),
-async (req: AuthRequest, res: Response) => {
-   const errors = validationResult(req)
-   if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
-
-   if (!req.params || !req.params.id) return res.status(400).json({ message: 'Cocktail id is missing in the request URI' })
-
-   let result
-   if (req.body.ingredientId) {
-      result = await CocktailService.addIngredient(req.params.id, req.body.ingredientId, req.body.amount)
-   }
-   else if (req.body.category && req.body.name) {
-      result = await CocktailService.addIngredient(req.params.id, {
-         category: req.body.category,
-         name: req.body.name,
-         description: req.body.description
-      }, req.body.amount)
-   }
-   else {
-      return res.status(400).json({ message: 'Ingredient id or category and name are missing in the request body' })
-   }
-   
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or ingredient not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to add ingredient to cocktail' })
-
-   return res.status(200).json(result.body)
-})
+router.put('/:id/ingredients',
+   authorize([Role.CREATOR, Role.SUPERVISOR]),
+   body('ingredientId').isLength({ max: 36 }),
+   body('category').isLength({ max: 150 }).trim(),
+   body('name').isLength({ max: 150 }).trim(),
+   body('description').isLength({ max: 5000 }).trim(),
+   body('amount').notEmpty().isLength({ max: 20 }).trim(),
+   CocktailController.addIngredient)
 
 /**
  * Remove ingredient from cocktail.
@@ -157,14 +76,9 @@ async (req: AuthRequest, res: Response) => {
  * @route   DELETE /cocktails/:id/ingredients/:ingredientId
  * @access  Private (Creator, Supervisor)
  */
-router.delete('/:id/ingredients/:ingredientId', authorize([Role.CREATOR, Role.SUPERVISOR]),
-async (req: AuthRequest, res: Response) => {
-   const result = await CocktailService.removeIngredient(req.params.id, req.params.ingredientId)
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or ingredient not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to remove ingredient from cocktail' })
-
-   return res.status(200).json({ message: 'Ingredient has been removed from the cocktail' })
-})
+router.delete('/:id/ingredients/:ingredientId',
+   authorize([Role.CREATOR, Role.SUPERVISOR]),
+   CocktailController.removeIngredient)
 
 /**
  * Delete cocktail by id.
@@ -172,14 +86,9 @@ async (req: AuthRequest, res: Response) => {
  * @route   DELETE /cocktails/:id
  * @access  Private (Creator, Supervisor)
  */
-router.delete('/:id', authorize([Role.CREATOR, Role.SUPERVISOR]),
-async (req: AuthRequest, res: Response) => {
-   const result = await CocktailService.remove(req.params.id)
-   if (result.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail not found' })
-   if (result.message === 'FAILED') return res.status(500).json({ message: 'Server failed to delete cocktail' })
-
-   return res.status(200).json({ message: 'Cocktail has been deleted' })
-})
+router.delete('/:id',
+   authorize([Role.CREATOR, Role.SUPERVISOR]),
+   CocktailController.deleteById)
 
 /**
  * Find cocktail reviews.

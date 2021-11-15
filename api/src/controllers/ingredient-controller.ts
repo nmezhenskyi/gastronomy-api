@@ -6,7 +6,7 @@ import { paramToInt } from '../common/utils'
 import { ApiError } from '../exceptions/api-error'
 
 /**
- * Handles operations on the `ingredients` resource.
+ * Handles operations on `ingredients` resource.
  */
 export const IngredientController = {
    /**
@@ -17,9 +17,9 @@ export const IngredientController = {
          const offset = paramToInt(req.query.offset)
          const limit = paramToInt(req.query.limit)
 
-         const result = await IngredientService.find({}, offset, limit)
+         const ingredients = await IngredientService.find({}, offset, limit)
 
-         return res.status(200).json(result)
+         return res.status(200).json(ingredients)
       }
       catch (err: unknown) {
          return next(err)
@@ -31,9 +31,13 @@ export const IngredientController = {
     */
    async getById(req: Request, res: Response, next: NextFunction) {
       try {
-         const result = await IngredientService.findOne({ id: req.params.id })
+         if (!req.params || !req.params.id) {
+            throw ApiError.BadRequest('Ingredient id is missing in the request URI')
+         }
 
-         return res.status(200).json(result)
+         const ingredient = await IngredientService.findOne({ id: req.params.id })
+
+         return res.status(200).json(ingredient)
       }
       catch (err: unknown) {
          return next(err)
@@ -50,13 +54,13 @@ export const IngredientController = {
             throw ApiError.BadRequest('Invalid data in the request body')
          }
           
-         const result = await IngredientService.create({
+         const ingredient = await IngredientService.create({
             category: req.body.category,
             name: req.body.name,
             description: req.body.description
          })
 
-         return res.status(200).json(result)
+         return res.status(201).json(ingredient)
       }
       catch (err: unknown) {
          return next(err)
@@ -77,14 +81,14 @@ export const IngredientController = {
             throw ApiError.BadRequest('Ingredient id is missing in the request URI')
          }
 
-         const result = await IngredientService.update({
+         const ingredient = await IngredientService.update({
             id: req.params.id,
             category: req.body.category,
             name: req.body.name,
             description: req.body.description
          })
 
-         return res.status(200).json(result)
+         return res.status(200).json(ingredient)
       }
       catch (err: unknown) {
          return next(err)
@@ -100,9 +104,9 @@ export const IngredientController = {
             throw ApiError.BadRequest('Ingredient id is missing in the request URI')
          }
 
-         const result = await IngredientService.remove(req.params.id)
+         const ingredient = await IngredientService.remove(req.params.id)
 
-         return res.status(200).json({ message: `Ingredient ${result.id} has been deleted` })
+         return res.status(200).json({ message: `Ingredient ${ingredient.id} has been deleted` })
       }
       catch (err: unknown) {
          return next(err)

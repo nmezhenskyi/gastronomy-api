@@ -10,51 +10,44 @@ export const ReviewService = {
    /**
     * Saves meal review.
     * 
-    * @param mealId Meal id
-    * @param userId User id
-    * @param body New meal review
+    * @param mealId Meal id.
+    * @param userId User id.
+    * @param body New meal review.
     * @returns ServiceResponse object with created meal review
     */
     async createMealReview(userId: string, mealId: string, body: {
       rating: number,
       review: string
    }): Promise<ServiceResponse<MealReview>> {
-      try {
-         const meal = await MealService.findOne({ id: mealId })
-         if (meal.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-         if (meal.message === 'FAILED' || !meal.body) return { success: false, message: 'FAILED' }
+      const meal = await MealService.findOne({ id: mealId })
 
-         const user = await UserService.findOne({ id: userId })
-         if (user.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-         if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
+      const user = await UserService.findOne({ id: userId })
+      if (user.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
+      if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
 
-         if (body.rating < 0 || body.rating > 5) return { success: false, message: 'INVALID' }
+      if (body.rating < 0 || body.rating > 5) return { success: false, message: 'INVALID' }
 
-         const repository = getRepository(MealReview)
-         const mealReview = new MealReview()
-         mealReview.meal = meal.body
-         mealReview.user = user.body
-         mealReview.rating = body.rating
-         mealReview.review = body.review
-         const saved = await repository.save(mealReview)
+      const repository = getRepository(MealReview)
+      const mealReview = new MealReview()
+      mealReview.meal = meal
+      mealReview.user = user.body
+      mealReview.rating = body.rating
+      mealReview.review = body.review
+      const saved = await repository.save(mealReview)
 
-         return {
-            success: true,
-            message: 'CREATED',
-            body: saved
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
+      return {
+         success: true,
+         message: 'CREATED',
+         body: saved
       }
    },
 
    /**
     * Updates meal review.
     * 
-    * @param userId User id
-    * @param mealId Meal id
-    * @param body Updated meal review
+    * @param userId User id.
+    * @param mealId Meal id.
+    * @param body Updated meal review.
     * @returns ServiceResponse object with updated meal review
     */
    async updateMealReview(userId: string, mealId: string, body: {
@@ -88,8 +81,8 @@ export const ReviewService = {
    /**
     * Removes meal review.
     * 
-    * @param userId User id
-    * @param mealId Meal id
+    * @param userId User id.
+    * @param mealId Meal id.
     * @returns ServiceResponse object
     */
    async removeMealReview(userId: string, mealId: string): Promise<ServiceResponse<null>> {
@@ -114,8 +107,8 @@ export const ReviewService = {
    /**
     * Finds meal review by user id and meal id.
     * 
-    * @param userId User id
-    * @param mealId Meal id
+    * @param userId User id.
+    * @param mealId Meal id.
     * @returns ServiceResponse object with found meal review
     */
    async findMealReview(userId: string, mealId: string): Promise<ServiceResponse<MealReview>> {
@@ -138,9 +131,9 @@ export const ReviewService = {
    /**
     * Finds meal reviews that match given conditions.
     * 
-    * @param searchBy Search condition
-    * @param offset Search offset
-    * @param limit Search limit
+    * @param searchBy Search condition.
+    * @param offset Search offset.
+    * @param limit Search limit.
     * @returns ServiceResponse object with array of found meal reviews
     */
    async findMealReviews(searchBy?: { userId?: string, mealId?: string }, offset = 0, limit = 0): Promise<ServiceResponse<MealReview[]>> {
@@ -168,51 +161,44 @@ export const ReviewService = {
    /**
     * Saves cocktail review.
     * 
-    * @param userId User id
-    * @param cocktailId Cocktail id
-    * @param body New cocktail review
+    * @param userId User id.
+    * @param cocktailId Cocktail id.
+    * @param body New cocktail review.
     * @returns ServiceResponse object with created cocktail review
     */
    async createCocktailReview(userId: string, cocktailId: string, body: {
       rating: number,
       review: string
    }): Promise<ServiceResponse<CocktailReview>> {
-      try {
-         const cocktail = await CocktailService.findOne({ id: cocktailId })
-         if (cocktail.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-         if (cocktail.message === 'FAILED' || !cocktail.body) return { success: false, message: 'FAILED' }
+      const cocktail = await CocktailService.findOne({ id: cocktailId })
 
-         const user = await UserService.findOne({ id: userId })
-         if (user.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-         if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
+      const user = await UserService.findOne({ id: userId })
+      if (user.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
+      if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
 
-         if (body.rating < 0 || body.rating > 5) return { success: false, message: 'INVALID' }
+      if (body.rating < 0 || body.rating > 5) return { success: false, message: 'INVALID' }
 
-         const repository = getRepository(CocktailReview)
-         const cocktailReview = new CocktailReview()
-         cocktailReview.cocktail = cocktail.body
-         cocktailReview.user = user.body
-         cocktailReview.rating = body.rating
-         cocktailReview.review = body.review
-         const saved = await repository.save(cocktailReview)
+      const repository = getRepository(CocktailReview)
+      const cocktailReview = new CocktailReview()
+      cocktailReview.cocktail = cocktail
+      cocktailReview.user = user.body
+      cocktailReview.rating = body.rating
+      cocktailReview.review = body.review
+      const saved = await repository.save(cocktailReview)
 
-         return {
-            success: true,
-            message: 'CREATED',
-            body: saved
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
+      return {
+         success: true,
+         message: 'CREATED',
+         body: saved
       }
    },
 
    /**
     * Updates cocktail review.
     * 
-    * @param userId User id
-    * @param cocktailId Meal id
-    * @param body Updated cocktail review
+    * @param userId User id.
+    * @param cocktailId Meal id.
+    * @param body Updated cocktail review.
     * @returns 
     */
    async updateCocktailReview(userId: string, cocktailId: string, body: {
@@ -246,8 +232,8 @@ export const ReviewService = {
    /**
     * Removes cocktail review.
     * 
-    * @param userId User id
-    * @param cocktailId Cocktail id
+    * @param userId User id.
+    * @param cocktailId Cocktail id.
     * @returns ServiceResponse object
     */
    async removeCocktailReview(userId: string, cocktailId: string): Promise<ServiceResponse<null>> {
@@ -272,8 +258,8 @@ export const ReviewService = {
    /**
     * Finds cocktail review by user id and cocktail id.
     * 
-    * @param userId User id
-    * @param cocktailId Meal id
+    * @param userId User id.
+    * @param cocktailId Meal id.
     * @returns ServiceResponse object with found cocktail review
     */
    async findCocktailReview(userId: string, cocktailId: string): Promise<ServiceResponse<CocktailReview>> {
@@ -296,9 +282,9 @@ export const ReviewService = {
    /**
     * Finds cocktail reviews that match given conditions.
     * 
-    * @param searchBy Search condition
-    * @param offset Search offset
-    * @param limit Search limit
+    * @param searchBy Search condition.
+    * @param offset Search offset.
+    * @param limit Search limit.
     * @returns ServiceResponse object with array of found cocktail reviews
     */
    async findCocktailReviews(searchBy?: { userId?: string, cocktailId?: string }, offset = 0, limit = 0): Promise<ServiceResponse<CocktailReview[]>> {

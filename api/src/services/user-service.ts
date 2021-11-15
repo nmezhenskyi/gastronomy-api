@@ -319,30 +319,23 @@ export const UserService = {
     * @returns ServiceResponse object with updated user account
     */
    async saveCocktail(userId: string, cocktailId: string): Promise<ServiceResponse<User>> {
-      try {
-         const userRepository = getRepository(User)
-         const user = await userRepository.findOne(userId)
-         if (!user) return { success: false, message: 'NOT_FOUND' }
+      const userRepository = getRepository(User)
+      const user = await userRepository.findOne(userId)
+      if (!user) return { success: false, message: 'NOT_FOUND' }
 
-         const cocktail = await CocktailService.findOne({ id: cocktailId })
-         if (cocktail.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-         if (cocktail.message === 'FAILED' || !cocktail.body) return { success: false, message: 'FAILED' }
+      const cocktail = await CocktailService.findOne({ id: cocktailId })
 
-         if (!user.savedCocktails)
-            user.savedCocktails = [cocktail.body]
-         else
-            user.savedCocktails.push(cocktail.body)
+      if (!user.savedCocktails)
+         user.savedCocktails = [cocktail]
+      else
+         user.savedCocktails.push(cocktail)
 
-         const saved = await userRepository.save(user)
+      const saved = await userRepository.save(user)
 
-         return {
-            success: true,
-            message: 'UPDATED',
-            body: saved
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
+      return {
+         success: true,
+         message: 'UPDATED',
+         body: saved
       }
    },
 
@@ -413,30 +406,23 @@ export const UserService = {
     * @returns ServiceResponse object with updated user account
     */
    async saveMeal(userId: string, mealId: string): Promise<ServiceResponse<User>> {
-      try {
-         const userRepository = getRepository(User)
-         const user = await userRepository.findOne(userId)
-         if (!user) return { success: false, message: 'NOT_FOUND' }
+      const userRepository = getRepository(User)
+      const user = await userRepository.findOne(userId)
+      if (!user) return { success: false, message: 'NOT_FOUND' }
 
-         const meal = await MealService.findOne({ id: mealId })
-         if (meal.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-         if (meal.message === 'FAILED' || !meal.body) return { success: false, message: 'FAILED' }
+      const meal = await MealService.findOne({ id: mealId })
 
-         if (!user.savedMeals)
-            user.savedMeals = [meal.body]
-         else
-            user.savedMeals.push(meal.body)
+      if (!user.savedMeals)
+         user.savedMeals = [meal]
+      else
+         user.savedMeals.push(meal)
 
-         const saved = await userRepository.save(user)
+      const saved = await userRepository.save(user)
 
-         return {
-            success: true,
-            message: 'UPDATED',
-            body: saved
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
+      return {
+         success: true,
+         message: 'UPDATED',
+         body: saved
       }
    },
 

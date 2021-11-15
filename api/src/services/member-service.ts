@@ -8,9 +8,9 @@ export const MemberService = {
    /**
     * Finds members in the database that match given conditions.
     * 
-    * @param searchBy Search condition
-    * @param offset Search offset
-    * @param limit Search limit
+    * @param searchBy Search condition.
+    * @param offset Search offset.
+    * @param limit Search limit.
     * @returns ServiceResponse object with array of found members
     */
    async find(searchBy?: {
@@ -45,7 +45,7 @@ export const MemberService = {
    /**
     * Finds one member in the database that matches given conditions.
     * 
-    * @param searchBy Search condition
+    * @param searchBy Search condition.
     * @returns ServiceResponse object with found user
     */
    async findOne(searchBy?: { id?: string, email?: string }): Promise<ServiceResponse<Member>> {
@@ -73,8 +73,8 @@ export const MemberService = {
    /**
     * Finds member by credetials. If password doesn't match, returns *NOT_FOUND*.
     * 
-    * @param email Member's email
-    * @param rawPassword Member's password
+    * @param email Member's email.
+    * @param rawPassword Member's password.
     * @returns ServiceResponse object with found member
     */
    async findByCredentials(email: string, rawPassword: string): Promise<ServiceResponse<Member>> {

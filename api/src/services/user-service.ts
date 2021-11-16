@@ -1,11 +1,11 @@
 import { getRepository } from 'typeorm'
 import bcrypt from 'bcrypt'
 import { User } from '../models/user'
-import { ServiceResponse } from './utils/service-response'
 import { TokenService } from './token-service'
 import { TokenPair } from '../common/types'
 import { CocktailService } from './cocktail-service'
 import { MealService } from './meal-service'
+import { ApiError } from '../exceptions/api-error'
 
 interface UserWithTokenPair {
    user: User,
@@ -17,238 +17,171 @@ export const UserService = {
    /**
     * Finds users in the database that match given conditions.
     * 
-    * @param searchBy Search condition
-    * @param offset Search offset
-    * @param limit Search limit
-    * @returns ServiceResponse object with array of found users
+    * @param searchBy Search condition.
+    * @param offset Search offset.
+    * @param limit Search limit.
+    * @returns Array of found users.
     */
-   async find(searchBy?: { location?: string }, offset = 0, limit = 10): Promise<ServiceResponse<User[]>> {
-      try {
-         const repository = getRepository(User)
+   async find(searchBy?: { location?: string }, offset = 0, limit = 50): Promise<User[]> {
+      const repo = getRepository(User)
 
-         const users = await repository.find({
-            select: ['id', 'email', 'name', 'location'],
-            where: searchBy,
-            order: { createdAt: 'DESC' },
-            skip: offset,
-            take: limit
-         })
+      const users = await repo.find({
+         select: ['id', 'email', 'name', 'location'],
+         where: searchBy,
+         order: { createdAt: 'DESC' },
+         skip: offset,
+         take: limit
+      })
 
-         if (!users || users.length === 0) return { success: false, message: 'NOT_FOUND' }
+      if (!users || !users.length) throw ApiError.NotFound('No users were found')
 
-         return {
-            success: true,
-            message: 'FOUND',
-            body: users
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
-      }
+      return users
    },
 
    /**
     * Finds one user in the database that matches given conditions.
     * 
-    * @param searchBy Search condition
-    * @returns ServiceResponse object with found user
+    * @param searchBy Search condition.
+    * @returns Found user.
     */
-   async findOne(searchBy?: { id?: string, email?: string }): Promise<ServiceResponse<User>> {
-      try {
-         const repository = getRepository(User)
+   async findOne(searchBy?: { id?: string, email?: string }): Promise<User> {
+      const repo = getRepository(User)
 
-         const user = await repository.findOne({
-            select: ['id', 'email', 'name', 'location' ],
-            where: searchBy
-         })
+      const user = await repo.findOne({
+         select: ['id', 'email', 'name', 'location' ],
+         where: searchBy
+      })
 
-         if (!user) return { success: false, message: 'NOT_FOUND' }
+      if (!user) throw ApiError.NotFound('User not found')
 
-         return {
-            success: true,
-            message: 'FOUND',
-            body: user
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
-      }
+      return user
    },
 
    /**
-    * Finds user by credetials. If password doesn't match, returns *NOT_FOUND*.
+    * Finds user by credetials.  
+    * If password doesn't match, throws `ApiError.NotFound`.
     * 
-    * @param email Member's email
-    * @param rawPassword Member's password
-    * @returns ServiceResponse object with found member
+    * @param email User's email.
+    * @param rawPassword User's password.
+    * @returns Found user.
     */
-   async findByCredentials(email: string, rawPassword: string): Promise<ServiceResponse<User>> {
-      try {
-         const repository = getRepository(User)
+   async findByCredentials(email: string, rawPassword: string): Promise<User> {
+      const repo = getRepository(User)
 
-         const user = await repository.findOne({ where: { email } })
+      const user = await repo.findOne({ where: { email } })
 
-         if (!user) return { success: false, message: 'NOT_FOUND' }
+      if (!user) throw ApiError.NotFound('User not found')
 
-         const passwordsMatch = await bcrypt.compare(rawPassword, user.password)
+      const passwordsMatch = await bcrypt.compare(rawPassword, user.password)
 
-         if (!passwordsMatch) return { success: false, message: 'NOT_FOUND' }
+      if (!passwordsMatch) throw ApiError.NotFound('User not found')
 
-         return {
-            success: true,
-            message: 'FOUND',
-            body: { ...user, password: '' }
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
-      }
+      return { ...user, password: '' }
    },
 
    /**
     * Adds the member to the database.
     * 
-    * @param userDto Information about new user account
-    * @returns ServiceResponse object with created user
+    * @param userDto New user information.
+    * @returns Created user.
     */
    async create(userDto: {
       email: string,
       password: string,
       name: string
-   }): Promise<ServiceResponse<User>> {
-      try {
-         const repository = getRepository(User)
+   }): Promise<User> {
+      const repository = getRepository(User)
 
-         const found = await repository.findOne({ email: userDto.email })
+      const found = await repository.findOne({ email: userDto.email })
 
-         if (found) return { success: false, message: 'INVALID' }
+      if (found) throw ApiError.BadRequest('User account with this email already exists')
 
-         const user = new User()
-         user.email = userDto.email
-         user.password = await bcrypt.hash(userDto.password, 10)
-         user.name = userDto.name
+      const user = new User()
+      user.email = userDto.email
+      user.password = await bcrypt.hash(userDto.password, 10)
+      user.name = userDto.name
 
-         const saved = await repository.save(user)
+      const created = await repository.save(user)
 
-         return {
-            success: true,
-            message: 'CREATED',
-            body: { ...saved, password: '' }
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
-      }
+      return { ...created, password: '' }
    },
 
    /**
-    * Registers a new user account by invoking ```create``` method and issuing access and refresh tokens for the user.
+    * Registers a new user account by invoking `create` method and issuing access and refresh tokens for the user.
     * 
-    * @param userDto Information about new user account
-    * @returns ServiceResponse object with created user and a token pair
+    * @param userDto New user information.
+    * @returns Created user and a access-refresh token pair.
     */
    async register(userDto: {
       email: string,
       password: string,
       name: string
-   }): Promise<ServiceResponse<UserWithTokenPair>> {
+   }): Promise<UserWithTokenPair> {
       const user = await this.create(userDto)
 
-      if (user.message === 'INVALID') return { success: false, message: 'INVALID' }
-      if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
-
-      const tokenPair = TokenService.generateTokens({ user: { id: user.body.id } })
-      await TokenService.saveUserRefreshToken(user.body.id, tokenPair.refreshToken)
+      const tokenPair = TokenService.generateTokens({ user: { id: user.id } })
+      await TokenService.saveUserRefreshToken(user.id, tokenPair.refreshToken)
 
       return {
-         success: true,
-         message: 'CREATED',
-         body: {
-            ...tokenPair,
-            user: user.body
-         }
+         ...tokenPair,
+         user: user
       }
    },
 
    /**
     * Verifies user's credentials and issues a pair of access and refresh tokens.
     * 
-    * @param email User's email
-    * @param password User's password
-    * @returns ServiceResponse object with an access and refresh tokens pair
+    * @param email User's email.
+    * @param password User's password.
+    * @returns Access-refresh token pair.
     */
-   async login(email: string, password: string): Promise<ServiceResponse<TokenPair>> {
+   async login(email: string, password: string): Promise<TokenPair> {
       const user = await this.findByCredentials(email, password)
 
-      if (user.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-      if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
+      const tokenPair = TokenService.generateTokens({ user: { id: user.id } })
+      await TokenService.saveUserRefreshToken(user.id, tokenPair.refreshToken)
 
-      const tokenPair = TokenService.generateTokens({ user: { id: user.body.id } })
-      await TokenService.saveUserRefreshToken(user.body.id, tokenPair.refreshToken)
-
-      return {
-         success: true,
-         message: 'FOUND',
-         body: tokenPair
-      }
+      return tokenPair
    },
 
    /**
     * Uses user's refresh token to issue a new pair of access and refresh tokens.
     * 
-    * @param refreshToken User's refresh token
-    * @returns ServiceResponse object with a new pair of access and refresh tokens
+    * @param refreshToken User's refresh token.
+    * @returns New access-refresh token pair.
     */
-   async refresh(refreshToken: string): Promise<ServiceResponse<TokenPair>> {
-      try {
-         const userPayload = TokenService.validateRefreshToken(refreshToken)
-         const tokenFromDb = await TokenService.findUserRefreshToken(refreshToken)
+   async refresh(refreshToken: string): Promise<TokenPair> {
+      const userPayload = TokenService.validateRefreshToken(refreshToken)
+      const tokenFromDb = await TokenService.findUserRefreshToken(refreshToken)
 
-         if (!userPayload || !tokenFromDb.success) return { success: false, message: 'FAILED' }
+      if (!userPayload || !tokenFromDb.success) throw ApiError.InternalError('Cannot refresh user access')
 
-         await TokenService.removeUserRefreshToken(refreshToken)
+      await TokenService.removeUserRefreshToken(refreshToken)
 
-         const repository = getRepository(User)
-         const user = await repository.findOne(userPayload.id)
-         if (!user) return { success: false, message: 'FAILED' }
+      const repository = getRepository(User)
+      const user = await repository.findOne(userPayload.id)
+      if (!user) throw ApiError.NotFound('User not found')
 
-         const tokenPair = TokenService.generateTokens({ user: { id: user.id } })
-         await TokenService.saveUserRefreshToken(user.id, tokenPair.refreshToken)
+      const tokenPair = TokenService.generateTokens({ user: { id: user.id } })
+      await TokenService.saveUserRefreshToken(user.id, tokenPair.refreshToken)
 
-         return {
-            success: true,
-            message: 'UPDATED',
-            body: tokenPair
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
-      }
+      return tokenPair
    },
 
    /**
     * Revokes user's refresh token.
     * 
-    * @param refreshToken User's refresh token
-    * @returns ServiceResponse object
+    * @param refreshToken User's refresh token.
     */
-   async logout(refreshToken: string): Promise<ServiceResponse<null>> {
-      const result = await TokenService.removeUserRefreshToken(refreshToken)
-
-      if (result.message === 'FAILED') return { success: false, message: 'FAILED' }
-
-      return {
-         success: true,
-         message: 'REMOVED',
-         body: null
-      }
+   async logout(refreshToken: string): Promise<void> {
+      await TokenService.removeUserRefreshToken(refreshToken)
    },
 
    /**
     * Updates the user in the database.
     * 
-    * @param userDto Updated user information
-    * @returns ServiceResponse object with updated member
+    * @param userDto User id and updated information.
+    * @returns Updated user.
     */
    async update(userDto: {
       id: string,
@@ -257,71 +190,53 @@ export const UserService = {
       name?: string,
       location?: string,
       photo?: string
-   }): Promise<ServiceResponse<User>> {
-      try {
-         const repository = getRepository(User)
+   }): Promise<User> {
+      const repository = getRepository(User)
 
-         const user = await repository.findOne(userDto.id)
+      const user = await repository.findOne(userDto.id)
 
-         if (!user) return { success: false, message: 'NOT_FOUND' }
+      if (!user) throw ApiError.NotFound('User not found')
 
-         if (userDto.email) user.email = userDto.email
-         if (userDto.password) user.password = await bcrypt.hash(userDto.password, 10)
-         if (userDto.name) user.name = userDto.name
-         if (userDto.location) user.location = userDto.location
-         if (userDto.photo) user.photo = userDto.photo
+      if (userDto.email) user.email = userDto.email
+      if (userDto.password) user.password = await bcrypt.hash(userDto.password, 10)
+      if (userDto.name) user.name = userDto.name
+      if (userDto.location) user.location = userDto.location
+      if (userDto.photo) user.photo = userDto.photo
 
-         const saved = await repository.save(user)
+      const updated = await repository.save(user)
 
-         return {
-            success: true,
-            message: 'UPDATED',
-            body: { ...saved, password: '' }
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
-      }
+      return { ...updated, password: '' }
    },
 
    /**
     * Removes specified user account from the database.
     * 
-    * @param id User's id
-    * @returns ServiceResponse object
+    * @param id User id.
+    * @returns Removed user.
     */
-   async remove(id: string): Promise<ServiceResponse<null>> {
-      try {
-         const repository = getRepository(User)
+   async remove(id: string): Promise<User> {
+      const repository = getRepository(User)
 
-         const user = await repository.findOne(id)
+      const user = await repository.findOne(id)
 
-         if (!user) return { success: false, message: 'NOT_FOUND' }
+      if (!user) throw ApiError.NotFound('User not found')
 
-         await repository.remove(user)
+      await repository.remove(user)
 
-         return {
-            success: true,
-            message: 'REMOVED',
-            body: null
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
-      }
+      return user
    },
 
    /**
     * Add the cocktail to the user's list of saved cocktails.
     * 
-    * @param userId User's id
-    * @param cocktailId Cocktail id
-    * @returns ServiceResponse object with updated user account
+    * @param userId User id.
+    * @param cocktailId Cocktail id.
+    * @returns Updated user.
     */
-   async saveCocktail(userId: string, cocktailId: string): Promise<ServiceResponse<User>> {
+   async saveCocktail(userId: string, cocktailId: string): Promise<User> {
       const userRepository = getRepository(User)
       const user = await userRepository.findOne(userId)
-      if (!user) return { success: false, message: 'NOT_FOUND' }
+      if (!user) throw ApiError.NotFound('User not found')
 
       const cocktail = await CocktailService.findOne({ id: cocktailId })
 
@@ -332,83 +247,63 @@ export const UserService = {
 
       const saved = await userRepository.save(user)
 
-      return {
-         success: true,
-         message: 'UPDATED',
-         body: saved
-      }
+      return saved
    },
 
    /**
     * Finds cocktails from the user's list of saved cocktails.
     * 
-    * @param userId User's id
-    * @returns ServiceResponse object with user account containing saved cocktails
+    * @param userId User id.
+    * @returns User with saved cocktails.
     */
-   async findSavedCocktails(userId: string): Promise<ServiceResponse<User>> {
-      try {
-         const userRepository = getRepository(User)
-         const user = await userRepository.findOne({
-            select: ['savedCocktails'],
-            where: { id: userId },
-            relations: ['savedCocktails']
-         })
-         if (!user || !user.savedCocktails || user.savedCocktails.length === 0) return { success: false, message: 'NOT_FOUND' }
+   async findSavedCocktails(userId: string): Promise<User> {
+      const userRepository = getRepository(User)
+      const user = await userRepository.findOne({
+         select: ['savedCocktails'],
+         where: { id: userId },
+         relations: ['savedCocktails']
+      })
 
-         return {
-            success: true,
-            message: 'FOUND',
-            body: user
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
-      }
+      if (!user) throw ApiError.NotFound('User not found')
+      if (!user.savedCocktails || !user.savedCocktails.length) throw ApiError.NotFound('No saved cocktails')
+
+      return user
    },
 
    /**
     * Removes the cocktail from the user's list of saved cocktails.
     * 
-    * @param userId User's id
-    * @param cocktailId Cocktail id
-    * @returns ServiceResponse object with updated user account
+    * @param userId User id.
+    * @param cocktailId Cocktail id.
+    * @returns Updated user.
     */
-   async removeSavedCocktail(userId: string, cocktailId: string): Promise<ServiceResponse<User>> {
-      try {
-         const userRepository = getRepository(User)
-         const user = await userRepository.findOne(userId)
-         if (!user) return { success: false, message: 'NOT_FOUND' }
+   async removeSavedCocktail(userId: string, cocktailId: string): Promise<User> {
+      const userRepository = getRepository(User)
+      const user = await userRepository.findOne(userId)
+      if (!user) throw ApiError.NotFound('User not found')
 
-         if (user.savedCocktails && user.savedCocktails.length > 0) {
-            user.savedCocktails = user.savedCocktails.filter(cocktail => {
-               cocktail.id !== cocktailId
-            })
-         }
-
-         const saved = await userRepository.save(user)
-
-         return {
-            success: true,
-            message: 'UPDATED',
-            body: saved
-         }
+      if (user.savedCocktails && user.savedCocktails.length > 0) {
+         user.savedCocktails = user.savedCocktails.filter(cocktail => {
+            cocktail.id !== cocktailId
+         })
       }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
-      }
+
+      const saved = await userRepository.save(user)
+
+      return saved
    },
 
    /**
     * Add meal to user's list of saved meals.
     * 
-    * @param userId User id
-    * @param mealId Meal id
-    * @returns ServiceResponse object with updated user account
+    * @param userId User id.
+    * @param mealId Meal id.
+    * @returns Updated user.
     */
-   async saveMeal(userId: string, mealId: string): Promise<ServiceResponse<User>> {
+   async saveMeal(userId: string, mealId: string): Promise<User> {
       const userRepository = getRepository(User)
       const user = await userRepository.findOne(userId)
-      if (!user) return { success: false, message: 'NOT_FOUND' }
+      if (!user) throw ApiError.NotFound('User not found')
 
       const meal = await MealService.findOne({ id: mealId })
 
@@ -419,69 +314,49 @@ export const UserService = {
 
       const saved = await userRepository.save(user)
 
-      return {
-         success: true,
-         message: 'UPDATED',
-         body: saved
-      }
+      return saved
    },
 
    /**
     * Finds meals from user's list of saved meals.
     * 
-    * @param userId User id
-    * @returns ServiceResponse object with user account containing saved meals
+    * @param userId User id.
+    * @returns User with saved meals.
     */
-   async findSavedMeals(userId: string): Promise<ServiceResponse<User>> {
-      try {
-         const userRepository = getRepository(User)
-         const user = await userRepository.findOne({
-            select: ['savedMeals'],
-            where: { id: userId },
-            relations: ['savedMeals']
-         })
-         if (!user || !user.savedMeals || user.savedMeals.length === 0) return { success: false, message: 'NOT_FOUND' }
+   async findSavedMeals(userId: string): Promise<User> {
+      const userRepository = getRepository(User)
+      const user = await userRepository.findOne({
+         select: ['savedMeals'],
+         where: { id: userId },
+         relations: ['savedMeals']
+      })
+      
+      if (!user) throw ApiError.NotFound('User not found')
+      if (!user.savedMeals || !user.savedMeals.length) throw ApiError.NotFound('No saved meals')
 
-         return {
-            success: true,
-            message: 'FOUND',
-            body: user
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
-      }
+      return user
    },
 
    /**
     * Removes meal from user's list of saved meals.
     * 
-    * @param userId User id
-    * @param mealId Meal id
-    * @returns ServiceResponse object with updated user account
+    * @param userId User id.
+    * @param mealId Meal id.
+    * @returns Updated user.
     */
-   async removeSavedMeal(userId: string, mealId: string): Promise<ServiceResponse<User>> {
-      try {
-         const userRepository = getRepository(User)
-         const user = await userRepository.findOne(userId)
-         if (!user) return { success: false, message: 'NOT_FOUND' }
+   async removeSavedMeal(userId: string, mealId: string): Promise<User> {
+      const userRepository = getRepository(User)
+      const user = await userRepository.findOne(userId)
+      if (!user) throw ApiError.NotFound('User not found')
 
-         if (user.savedMeals && user.savedMeals.length > 0) {
-            user.savedMeals = user.savedMeals.filter(meal => {
-               meal.id !== mealId
-            })
-         }
-
-         const saved = await userRepository.save(user)
-
-         return {
-            success: true,
-            message: 'UPDATED',
-            body: saved
-         }
+      if (user.savedMeals && user.savedMeals.length > 0) {
+         user.savedMeals = user.savedMeals.filter(meal => {
+            meal.id !== mealId
+         })
       }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
-      }
+
+      const saved = await userRepository.save(user)
+
+      return saved
    }
 }

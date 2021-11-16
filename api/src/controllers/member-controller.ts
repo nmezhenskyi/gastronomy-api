@@ -77,11 +77,9 @@ export const MemberController = {
          if (name) searchBy.name = name
          if (location) searchBy.location = location
 
-         const member = await UserService.find(searchBy, offset, limit)
-         if (member.message === 'NOT_FOUND') throw ApiError.NotFound('No users were found')
-         if (member.message === 'FAILED') throw ApiError.InternalError('Server failed to find users')
+         const users = await UserService.find(searchBy, offset, limit)
    
-         return res.status(200).json(member.body)
+         return res.status(200).json(users)
       }
       catch (err: unknown) {
          return next(err)
@@ -98,10 +96,8 @@ export const MemberController = {
          }
 
          const user = await UserService.findOne({ id: req.params.id })
-         if (user.message === 'NOT_FOUND') throw ApiError.NotFound('User not found')
-         if (user.message === 'FAILED') throw ApiError.InternalError('Server failed to find user')
 
-         return res.status(200).json(user.body)
+         return res.status(200).json(user)
       }
       catch (err: unknown) {
          return next(err)

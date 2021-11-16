@@ -100,18 +100,15 @@ export const TokenService = {
          const repository = getRepository(UserRefreshToken)
          const user = await UserService.findOne({ id: userId })
 
-         if (user.message === 'NOT_FOUND' || user.message === 'FAILED' || !user.body)
-            return { success: false, message: 'FAILED'}
-
          // Limit user to 6 refresh tokens
-         const count = await repository.count({ where: { userId: user.body.id } })
+         const count = await repository.count({ where: { userId: user.id } })
          if (count >= 6) {
-            const oldestToken = await repository.findOne({ where: { userId: user.body.id }, order: { createdAt: 'ASC' } })
+            const oldestToken = await repository.findOne({ where: { userId: user.id }, order: { createdAt: 'ASC' } })
             if (oldestToken) await repository.remove(oldestToken)
          }
 
          const newToken = new UserRefreshToken()
-         newToken.user = user.body
+         newToken.user = user
          newToken.token = refreshToken
          if (payload.exp) {
             const date = new Date(0) // Set date to the start of the Epoch

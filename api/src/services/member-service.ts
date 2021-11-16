@@ -17,7 +17,7 @@ export const MemberService = {
       firstName?: string,
       lastName?: string,
       role?: MemberRole
-   }, offset = 0, limit = 10): Promise<Member[]> {
+   }, offset = 0, limit = 50): Promise<Member[]> {
       const repo = getRepository(Member)
 
       const members = await repo.find({

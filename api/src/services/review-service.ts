@@ -22,15 +22,13 @@ export const ReviewService = {
       const meal = await MealService.findOne({ id: mealId })
 
       const user = await UserService.findOne({ id: userId })
-      if (user.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-      if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
 
       if (body.rating < 0 || body.rating > 5) return { success: false, message: 'INVALID' }
 
       const repository = getRepository(MealReview)
       const mealReview = new MealReview()
       mealReview.meal = meal
-      mealReview.user = user.body
+      mealReview.user = user
       mealReview.rating = body.rating
       mealReview.review = body.review
       const saved = await repository.save(mealReview)
@@ -173,15 +171,13 @@ export const ReviewService = {
       const cocktail = await CocktailService.findOne({ id: cocktailId })
 
       const user = await UserService.findOne({ id: userId })
-      if (user.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-      if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
 
       if (body.rating < 0 || body.rating > 5) return { success: false, message: 'INVALID' }
 
       const repository = getRepository(CocktailReview)
       const cocktailReview = new CocktailReview()
       cocktailReview.cocktail = cocktail
-      cocktailReview.user = user.body
+      cocktailReview.user = user
       cocktailReview.rating = body.rating
       cocktailReview.review = body.review
       const saved = await repository.save(cocktailReview)

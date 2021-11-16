@@ -115,7 +115,7 @@ export const MemberController = {
       try {
          const errors = validationResult(req)
          if (!errors.isEmpty()) {
-            throw ApiError.BadRequest('Invalid data in the request body')
+            throw ApiError.BadRequest('Invalid data in the request body', errors.array())
          }
 
          const member = await MemberService.create({
@@ -140,7 +140,7 @@ export const MemberController = {
       try {
          const errors = validationResult(req)
          if (!errors.isEmpty()) {
-            throw ApiError.BadRequest('Invalid data in the request body')
+            throw ApiError.BadRequest('Invalid data in the request body', errors.array())
          }
 
          const member = await MemberService.update({

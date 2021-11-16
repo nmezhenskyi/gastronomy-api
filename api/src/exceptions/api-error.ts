@@ -9,13 +9,19 @@
      */
    status: number
 
-   constructor(status: number, message: string) {
+   /**
+    * Array of Error specific details.
+    */
+   details: any[]
+
+   constructor(status: number, message: string, details: any[] = []) {
       super(message)
       this.status = status
+      this.details = details
    }
 
-   static BadRequest(message: string) {
-      return new ApiError(400, message)
+   static BadRequest(message: string, details: any[] = []) {
+      return new ApiError(400, message, details)
    }
 
    static Unauthorized(message?: string) {

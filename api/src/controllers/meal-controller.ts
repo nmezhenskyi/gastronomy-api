@@ -51,7 +51,7 @@ export const MealController = {
       try {
          const errors = validationResult(req)
          if (!errors.isEmpty()) {
-            throw ApiError.BadRequest('Invalid data in the request body')
+            throw ApiError.BadRequest('Invalid data in the request body', errors.array())
          }
 
          const meal = await MealService.create({
@@ -78,7 +78,7 @@ export const MealController = {
       try {
          const errors = validationResult(req)
          if (!errors.isEmpty()) {
-            throw ApiError.BadRequest('Invalid data in the request body')
+            throw ApiError.BadRequest('Invalid data in the request body', errors.array())
          }
 
          if (!req.params || !req.params.id) {
@@ -112,7 +112,7 @@ export const MealController = {
       try {
          const errors = validationResult(req)
          if (!errors.isEmpty()) {
-            throw ApiError.BadRequest('Invalid data in the request body')
+            throw ApiError.BadRequest('Invalid data in the request body', errors.array())
          }
 
          if (!req.params || !req.params.id) {

@@ -11,7 +11,7 @@ export const errorHandler = (err: Error, _: Request, res: Response, __: NextFunc
    logger.error(err)
 
    if (err instanceof ApiError) {
-      return res.status(err.status).json({ error: err.message })
+      return res.status(err.status).json({ error: err.message, details: err.details })
    }
 
    return res.status(500).json({ error: 'Internal Error' })

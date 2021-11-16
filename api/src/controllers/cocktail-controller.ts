@@ -51,7 +51,7 @@ export const CocktailController = {
       try {
          const errors = validationResult(req)
          if (!errors.isEmpty()) {
-            throw ApiError.BadRequest('Invalid data in the request body')
+            throw ApiError.BadRequest('Invalid data in the request body', errors.array())
          }
 
          const cocktail = await CocktailService.create({
@@ -77,7 +77,7 @@ export const CocktailController = {
       try {
          const errors = validationResult(req)
          if (!errors.isEmpty()) {
-            throw ApiError.BadRequest('Invalid data in the request body')
+            throw ApiError.BadRequest('Invalid data in the request body', errors.array())
          }
          
          if (!req.params || !req.params.id) {
@@ -110,7 +110,7 @@ export const CocktailController = {
       try {
          const errors = validationResult(req)
          if (!errors.isEmpty()) {
-            throw ApiError.BadRequest('Invalid data in the request body')
+            throw ApiError.BadRequest('Invalid data in the request body', errors.array())
          }
 
          if (!req.params || !req.params.id) {

@@ -51,7 +51,7 @@ export const IngredientController = {
       try {
          const errors = validationResult(req)
          if (!errors.isEmpty()) {
-            throw ApiError.BadRequest('Invalid data in the request body')
+            throw ApiError.BadRequest('Invalid data in the request body', errors.array())
          }
           
          const ingredient = await IngredientService.create({
@@ -74,7 +74,7 @@ export const IngredientController = {
       try {
          const errors = validationResult(req)
          if (!errors.isEmpty()) {
-            throw ApiError.BadRequest('Invalid data in the request body')
+            throw ApiError.BadRequest('Invalid data in the request body', errors.array())
          }
 
          if (!req.params || !req.params.id) {

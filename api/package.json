@@ -1,7 +1,7 @@
 {
    "name": "gastronomy-api",
    "version": "1.0.0",
-   "description": "",
+   "description": "REST API that provides meal and cocktail recipes",
    "main": "index.js",
    "scripts": {
       "start": "node dist/index.js",

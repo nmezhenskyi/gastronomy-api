@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
 import { validationResult } from 'express-validator'
 import { CocktailService } from '../services/cocktail-service'
+import { ReviewService } from '../services/review-service'
 import { paramToInt } from '../common/utils'
+import { AuthRequest } from '../common/types'
 import { GetCocktailsQuery } from './utils/cocktail-utils'
 import { ApiError } from '../exceptions/api-error'
 
@@ -174,6 +176,74 @@ export const CocktailController = {
          const cocktail = await CocktailService.remove(req.params.id)
 
          return res.status(200).json({ message: `Cocktail ${cocktail.id} has been deleted` })
+      }
+      catch (err: unknown) {
+         return next(err)
+      }
+   },
+
+   /**
+    * Find all reviews for one cocktail by cocktail id.
+    */
+   async findReviews(req: Request, res: Response, next: NextFunction) {
+      try {
+         if (!req.params || !req.params.id) {
+            throw ApiError.BadRequest('Cocktail id is missing in the request URI')
+         }
+
+         const reviews = await ReviewService.findCocktailReviews({ cocktailId: req.params.id })
+
+         return res.status(200).json(reviews)
+      }
+      catch (err: unknown) {
+         return next(err)
+      }
+   },
+
+   /**
+    * Create new user review for one cocktail by cocktail id.
+    */
+   async writeReview(req: AuthRequest, res: Response, next: NextFunction) {
+      try {
+         const errors = validationResult(req)
+         if (!errors.isEmpty()) {
+            throw ApiError.BadRequest('Invalid data in the request body')
+         }
+         if (!req.params || !req.params.id) {
+            throw ApiError.BadRequest('Cocktail id is missing in the request URI')
+         }
+
+         const createdReview = await ReviewService.createCocktailReview(req.user!.id, req.params.id, {
+            rating: req.body.rating,
+            review: req.body.review
+         })
+
+         return res.status(201).json(createdReview)
+      }
+      catch (err: unknown) {
+         return next(err)
+      }
+   },
+
+   /**
+    * Updated existing user review for one cocktail by cocktail id.
+    */
+   async updateReview(req: AuthRequest, res: Response, next: NextFunction) {
+      try {
+         const errors = validationResult(req)
+         if (!errors.isEmpty()) {
+            throw ApiError.BadRequest('Invalid data in the request body')
+         }
+         if (!req.params || !req.params.id) {
+            throw ApiError.BadRequest('Cocktail id is missing in the request URI')
+         }
+
+         const updatedReview = await ReviewService.updateCocktailReview(req.user!.id, req.params.id, {
+            rating: req.body.rating,
+            review: req.body.review
+         })
+
+         return res.status(200).json(updatedReview)
       }
       catch (err: unknown) {
          return next(err)

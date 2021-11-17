@@ -25,8 +25,8 @@ export const UserController = {
             email: req.body.email,
             password: req.body.password
          })
-
          res.cookie('userRefreshToken', user.refreshToken, { maxAge: COOKIE_MAX_AGE, httpOnly: true })
+         
          return res.status(200).json(user)
       }
       catch (err: unknown) {
@@ -45,8 +45,8 @@ export const UserController = {
          }
 
          const tokenPair = await UserService.login(req.body.email, req.body.password)
-
          res.cookie('userRefreshToken', tokenPair.refreshToken, { maxAge: COOKIE_MAX_AGE, httpOnly: true })
+
          return res.status(200).json(tokenPair)
       }
       catch (err: unknown) {
@@ -81,8 +81,8 @@ export const UserController = {
 
          const { userRefreshToken } = req.cookies
          const tokenPair = await UserService.refresh(userRefreshToken)
-
          res.cookie('userRefreshToken', tokenPair.refreshToken, { maxAge: COOKIE_MAX_AGE, httpOnly: true })
+
          return res.status(200).json(tokenPair)
       }
       catch (err: unknown) {
@@ -253,10 +253,7 @@ export const UserController = {
       try {
          const reviews = await ReviewService.findCocktailReviews({ userId: req.user!.id })
 
-         if (reviews.message === 'NOT_FOUND') throw ApiError.NotFound('No cocktail reviews were found')
-         if (reviews.message === 'FAILED') throw ApiError.InternalError('Server failed to find cocktail reviews')
-
-         return res.status(200).json(reviews.body)
+         return res.status(200).json(reviews)
       }
       catch (err: unknown) {
          return next(err)
@@ -270,10 +267,7 @@ export const UserController = {
       try {
          const reviews = await ReviewService.findMealReviews({ userId: req.user!.id })
 
-         if (reviews.message === 'NOT_FOUND') throw ApiError.NotFound('No cocktail reviews were found')
-         if (reviews.message === 'FAILED') throw ApiError.InternalError('Server failed to find cocktail reviews')
-
-         return res.status(200).json(reviews.body)
+         return res.status(200).json(reviews)
       }
       catch (err: unknown) {
          return next(err)

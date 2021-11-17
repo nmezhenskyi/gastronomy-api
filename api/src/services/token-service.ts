@@ -1,10 +1,10 @@
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import config from 'config'
 import { getRepository, LessThan } from 'typeorm'
-import { ServiceResponse } from './utils/service-response'
 import { UserService } from './user-service'
 import { UserRefreshToken } from '../models/user-refresh-token'
 import { TokenPair } from '../common/types'
+import { ApiError } from '../exceptions/api-error'
 
 /**
  * Manages access and refresh Json Web Tokens.
@@ -92,46 +92,37 @@ export const TokenService = {
     * @param refreshToken User's refresh token
     * @returns ServiceResponse object with the saved token
     */
-   async saveUserRefreshToken(userId: string, refreshToken: string): Promise<ServiceResponse<UserRefreshToken>> {
-      try {
-         const payload = this.validateRefreshToken(refreshToken)
-         if (!payload) return { success: false, message: 'INVALID' }
+   async saveUserRefreshToken(userId: string, refreshToken: string): Promise<UserRefreshToken> {
+      const payload = this.validateRefreshToken(refreshToken)
+      if (!payload) throw ApiError.InternalError('Invalid refresh token')
 
-         const repository = getRepository(UserRefreshToken)
-         const user = await UserService.findOne({ id: userId })
+      const repository = getRepository(UserRefreshToken)
+      const user = await UserService.findOne({ id: userId })
 
-         // Limit user to 6 refresh tokens
-         const count = await repository.count({ where: { userId: user.id } })
-         if (count >= 6) {
-            const oldestToken = await repository.findOne({ where: { userId: user.id }, order: { createdAt: 'ASC' } })
-            if (oldestToken) await repository.remove(oldestToken)
-         }
-
-         const newToken = new UserRefreshToken()
-         newToken.user = user
-         newToken.token = refreshToken
-         if (payload.exp) {
-            const date = new Date(0) // Set date to the start of the Epoch
-            date.setUTCSeconds(payload.exp) // payload.exp returns number of seconds since the Epoch
-            newToken.expiryDate = date
-         }
-         else {
-            const date = new Date() // Set date to the current date
-            date.setDate(date.getDate() + 14)
-            newToken.expiryDate = date
-         }
-
-         const saved = await repository.save(newToken)
-
-         return {
-            success: true,
-            message: 'CREATED',
-            body: saved
-         }
+      // Limit user to 6 refresh tokens
+      const count = await repository.count({ where: { userId: user.id } })
+      if (count >= 6) {
+         const oldestToken = await repository.findOne({ where: { userId: user.id }, order: { createdAt: 'ASC' } })
+         if (oldestToken) await repository.remove(oldestToken)
       }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
+
+      const newToken = new UserRefreshToken()
+      newToken.user = user
+      newToken.token = refreshToken
+      if (payload.exp) {
+         const date = new Date(0) // Set date to the start of the Epoch
+         date.setUTCSeconds(payload.exp) // payload.exp returns number of seconds since the Epoch
+         newToken.expiryDate = date
       }
+      else {
+         const date = new Date() // Set date to the current date
+         date.setDate(date.getDate() + 14)
+         newToken.expiryDate = date
+      }
+
+      const saved = await repository.save(newToken)
+
+      return saved
    },
 
    /**
@@ -140,25 +131,13 @@ export const TokenService = {
     * @param refreshToken User's refresh token
     * @returns ServiceResponse object
     */
-   async removeUserRefreshToken(refreshToken: string): Promise<ServiceResponse<null>> {
-      try {
-         const repository = getRepository(UserRefreshToken)
+   async removeUserRefreshToken(refreshToken: string): Promise<void> {
+      const repository = getRepository(UserRefreshToken)
 
-         const tokenRecord = await repository.findOne({ token: refreshToken })
+      const tokenRecord = await repository.findOne({ token: refreshToken })
+      if (!tokenRecord) return
 
-         if (!tokenRecord) return { success: false, message: 'NOT_FOUND' }
-
-         await repository.remove(tokenRecord)
-
-         return {
-            success: true,
-            message: 'REMOVED',
-            body: null
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
-      }
+      await repository.remove(tokenRecord)
    },
 
    /**
@@ -167,23 +146,14 @@ export const TokenService = {
     * @param refreshToken User's refresh token
     * @returns ServiceResponse object with the found token
     */
-   async findUserRefreshToken(refreshToken: string): Promise<ServiceResponse<UserRefreshToken>> {
-      try {
-         const repository = getRepository(UserRefreshToken)
+   async findUserRefreshToken(refreshToken: string): Promise<UserRefreshToken> {
+      const repository = getRepository(UserRefreshToken)
 
-         const tokenRecord = await repository.findOne({ token: refreshToken })
+      const tokenRecord = await repository.findOne({ token: refreshToken })
 
-         if (!tokenRecord) return { success: false, message: 'NOT_FOUND' }
+      if (!tokenRecord) throw ApiError.InternalError('Refresh token is invalid')
 
-         return {
-            success: true,
-            message: 'REMOVED',
-            body: tokenRecord
-         }
-      }
-      catch (err: unknown) {
-         return { success: false, message: 'FAILED' }
-      }
+      return tokenRecord
    },
 
    /**
@@ -200,7 +170,7 @@ export const TokenService = {
             where: { expiryDate: LessThan(expired) }
          })
 
-         if (!tokens || tokens.length === 0) return
+         if (!tokens || !tokens.length) return
 
          for (const token of tokens) {
             await repository.remove(token)

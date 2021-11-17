@@ -154,7 +154,7 @@ export const UserService = {
       const userPayload = TokenService.validateRefreshToken(refreshToken)
       const tokenFromDb = await TokenService.findUserRefreshToken(refreshToken)
 
-      if (!userPayload || !tokenFromDb.success) throw ApiError.InternalError('Cannot refresh user access')
+      if (!userPayload || !tokenFromDb) throw ApiError.InternalError('Cannot refresh user access')
 
       await TokenService.removeUserRefreshToken(refreshToken)
 

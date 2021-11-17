@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
 import { validationResult } from 'express-validator'
 import { MealService } from '../services/meal-service'
+import { ReviewService } from '../services/review-service'
 import { paramToInt } from '../common/utils'
+import { AuthRequest } from '../common/types'
 import { GetMealsQuery } from './utils/meal-utils'
 import { ApiError } from '../exceptions/api-error'
 
@@ -176,6 +178,74 @@ export const MealController = {
          const meal = await MealService.remove(req.params.id)
 
          return res.status(200).json({ message: `Meal ${meal.id} has been deleted` })
+      }
+      catch (err: unknown) {
+         return next(err)
+      }
+   },
+
+   /**
+    * Find all reviews for one meal by meal id.
+    */
+    async findReviews(req: Request, res: Response, next: NextFunction) {
+      try {
+         if (!req.params || !req.params.id) {
+            throw ApiError.BadRequest('Meal id is missing in the request URI')
+         }
+
+         const reviews = await ReviewService.findMealReviews({ mealId: req.params.id })
+
+         return res.status(200).json(reviews)
+      }
+      catch (err: unknown) {
+         return next(err)
+      }
+   },
+
+   /**
+    * Create new user review for one meal by meal id.
+    */
+   async writeReview(req: AuthRequest, res: Response, next: NextFunction) {
+      try {
+         const errors = validationResult(req)
+         if (!errors.isEmpty()) {
+            throw ApiError.BadRequest('Invalid data in the request body')
+         }
+         if (!req.params || !req.params.id) {
+            throw ApiError.BadRequest('Meal id is missing in the request URI')
+         }
+
+         const createdReview = await ReviewService.createMealReview(req.user!.id, req.params.id, {
+            rating: req.body.rating,
+            review: req.body.review
+         })
+
+         return res.status(201).json(createdReview)
+      }
+      catch (err: unknown) {
+         return next(err)
+      }
+   },
+
+   /**
+    * Updated existing user review for one meal by meal id.
+    */
+   async updateReview(req: AuthRequest, res: Response, next: NextFunction) {
+      try {
+         const errors = validationResult(req)
+         if (!errors.isEmpty()) {
+            throw ApiError.BadRequest('Invalid data in the request body')
+         }
+         if (!req.params || !req.params.id) {
+            throw ApiError.BadRequest('Meal id is missing in the request URI')
+         }
+
+         const updatedReview = await ReviewService.updateMealReview(req.user!.id, req.params.id, {
+            rating: req.body.rating,
+            review: req.body.review
+         })
+
+         return res.status(200).json(updatedReview)
       }
       catch (err: unknown) {
          return next(err)

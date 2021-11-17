@@ -1,8 +1,7 @@
-import express, { Response } from 'express'
-import { body, validationResult } from 'express-validator'
-import { ReviewService } from '../services/review-service'
+import express from 'express'
+import { body } from 'express-validator'
 import { authorize } from '../middleware/authorize'
-import { AuthRequest, Role } from '../common/types'
+import { Role } from '../common/types'
 import { MealController } from '../controllers/meal-controller'
 
 export const router = express.Router()
@@ -97,13 +96,7 @@ router.delete('/:id',
  * @route   GET /meals/:id/reviews
  * @access  Public
  */
-router.get('/:id/reviews', async (req, res) => {
-   const foundReviews = await ReviewService.findMealReviews({ mealId: req.params.id })
-   if (foundReviews.message === 'NOT_FOUND') return res.status(404).json({ message: 'No mea; reviews were found' })
-   if (foundReviews.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find meal reviews' })
-
-   return res.status(200).json(foundReviews.body)
-})
+router.get('/:id/reviews', MealController.findReviews)
 
 /**
  * Write meal review as User.
@@ -111,24 +104,11 @@ router.get('/:id/reviews', async (req, res) => {
  * @route   POST /meals/:id/reviews
  * @access  Private (User)
  */
-router.post('/:id/reviews', authorize(Role.USER),
-body('rating').notEmpty().isInt({ min: 0, max: 5 }),
-body('review').notEmpty().isLength({ max: 2000 }).trim(),
-async (req: AuthRequest, res: Response) => {
-   const errors = validationResult(req)
-   if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
-
-   const savedReview = await ReviewService.createMealReview(req.user!.id, req.params.id, {
-      rating: req.body.rating,
-      review: req.body.review
-   })
-   if (savedReview.message === 'INVALID') return res.status(400).json({ message: 'Invalid data in the request body' })
-   if (savedReview.message === 'NOT_FOUND') return res.status(404).json({ message: 'Meal and/or user account not found' })
-   if (savedReview.message === 'FAILED') return res.status(500).json({ message: 'Server failed to create meal review' })
-
-   return res.status(200).json(savedReview.body)
-})
+router.post('/:id/reviews',
+   authorize(Role.USER),
+   body('rating').notEmpty().isInt({ min: 0, max: 5 }),
+   body('review').notEmpty().isLength({ max: 2000 }).trim(),
+   MealController.writeReview)
 
 /**
  * Update meal review as User.
@@ -136,21 +116,8 @@ async (req: AuthRequest, res: Response) => {
  * @route   PUT /meals/:id/reviews
  * @access  Private (User)
  */
-router.put('/:id/reviews', authorize(Role.USER),
-body('rating').optional().isInt({ min: 0, max: 5 }),
-body('review').optional().isLength({ max: 2000 }).trim(),
-async (req: AuthRequest, res: Response) => {
-   const errors = validationResult(req)
-   if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
-
-   const updatedReview = await ReviewService.updateMealReview(req.user!.id, req.params.id, {
-      rating: req.body.rating,
-      review: req.body.review
-   })
-   if (updatedReview.message === 'INVALID') return res.status(400).json({ message: 'Invalid data in the request body' })
-   if (updatedReview.message === 'NOT_FOUND') return res.status(404).json({ message: 'Meal and/or user account not found' })
-   if (updatedReview.message === 'FAILED') return res.status(500).json({ message: 'Server failed to update meal review' })
-
-   return res.status(200).json(updatedReview.body)
-})
+router.put('/:id/reviews',
+   authorize(Role.USER),
+   body('rating').optional().isInt({ min: 0, max: 5 }),
+   body('review').optional().isLength({ max: 2000 }).trim(),
+   MealController.updateReview)

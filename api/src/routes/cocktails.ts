@@ -1,8 +1,7 @@
-import express, { Response } from 'express'
-import { body, validationResult } from 'express-validator'
-import { ReviewService } from '../services/review-service'
+import express from 'express'
+import { body } from 'express-validator'
 import { authorize } from '../middleware/authorize'
-import { AuthRequest, Role } from '../common/types'
+import { Role } from '../common/types'
 import { CocktailController } from '../controllers/cocktail-controller'
 
 export const router = express.Router()
@@ -96,13 +95,7 @@ router.delete('/:id',
  * @route   GET /cocktails/:id/reviews
  * @access  Public
  */
-router.get('/:id/reviews', async (req, res) => {
-   const foundReviews = await ReviewService.findCocktailReviews({ cocktailId: req.params.id })
-   if (foundReviews.message === 'NOT_FOUND') return res.status(404).json({ message: 'No cocktail reviews were found' })
-   if (foundReviews.message === 'FAILED') return res.status(500).json({ message: 'Server failed to find cocktail reviews' })
-
-   return res.status(200).json(foundReviews.body)
-})
+router.get('/:id/reviews', CocktailController.findReviews)
 
 /**
  * Write cocktail review as User.
@@ -110,24 +103,11 @@ router.get('/:id/reviews', async (req, res) => {
  * @route   POST /cocktails/:id/reviews
  * @access  Private (User)
  */
-router.post('/:id/reviews', authorize(Role.USER),
-body('rating').notEmpty().isInt({ min: 0, max: 5 }),
-body('review').notEmpty().isLength({ max: 2000 }).trim(),
-async (req: AuthRequest, res: Response) => {
-   const errors = validationResult(req)
-   if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
-
-   const savedReview = await ReviewService.createCocktailReview(req.user!.id, req.params.id, {
-      rating: req.body.rating,
-      review: req.body.review
-   })
-   if (savedReview.message === 'INVALID') return res.status(400).json({ message: 'Invalid data in the request body' })
-   if (savedReview.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or user account not found' })
-   if (savedReview.message === 'FAILED') return res.status(500).json({ message: 'Server failed to create cocktail review' })
-
-   return res.status(200).json(savedReview.body)
-})
+router.post('/:id/reviews',
+   authorize(Role.USER),
+   body('rating').notEmpty().isInt({ min: 0, max: 5 }),
+   body('review').notEmpty().isLength({ max: 2000 }).trim(),
+   CocktailController.writeReview)
 
 /**
  * Update cocktail review as User.
@@ -135,21 +115,8 @@ async (req: AuthRequest, res: Response) => {
  * @route   PUT /cocktails/:id/reviews
  * @access  Private (User)
  */
-router.put('/:id/reviews', authorize(Role.USER),
-body('rating').optional().isInt({ min: 0, max: 5 }),
-body('review').optional().isLength({ max: 2000 }).trim(),
-async (req: AuthRequest, res: Response) => {
-   const errors = validationResult(req)
-   if (!errors.isEmpty())
-      return res.status(400).json({ message: 'Invalid data in the request body', errors: errors.array() })
-
-   const updatedReview = await ReviewService.updateCocktailReview(req.user!.id, req.params.id, {
-      rating: req.body.rating,
-      review: req.body.review
-   })
-   if (updatedReview.message === 'INVALID') return res.status(400).json({ message: 'Invalid data in the request body' })
-   if (updatedReview.message === 'NOT_FOUND') return res.status(404).json({ message: 'Cocktail and/or user account not found' })
-   if (updatedReview.message === 'FAILED') return res.status(500).json({ message: 'Server failed to update cocktail review' })
-
-   return res.status(200).json(updatedReview.body)
-})
+router.put('/:id/reviews',
+   authorize(Role.USER),
+   body('rating').optional().isInt({ min: 0, max: 5 }),
+   body('review').optional().isLength({ max: 2000 }).trim(),
+   CocktailController.updateReview)

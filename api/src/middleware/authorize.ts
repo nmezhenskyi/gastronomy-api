@@ -1,16 +1,17 @@
 import { Response, NextFunction } from 'express'
 import { AuthRequest, Role } from '../common/types'
 import { authenticate } from './authenticate'
+import { ApiError } from '../exceptions/api-error'
 
 /**
  * Middleware for securing routes.
  * Restricts access to a route based on the provided roles.
- * Includes ```authenticate``` middleware in the chain.
+ * Includes `authenticate` middleware in the chain.
  */
 export const authorize = (roles: Role | Role[] = []) => {
    return [
       authenticate,
-      (req: AuthRequest, res: Response, next: NextFunction) => {
+      (req: AuthRequest, _: Response, next: NextFunction) => {
          if (!(roles instanceof Array))
             roles = [roles]
 
@@ -36,7 +37,7 @@ export const authorize = (roles: Role | Role[] = []) => {
                }
             })
 
-            if (!authorized) return res.status(403).json({ message: 'Forbidden' })
+            if (!authorized) return next(ApiError.Forbidden())
          }
       
          return next()

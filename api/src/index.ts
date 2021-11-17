@@ -5,19 +5,22 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { createConnection, ConnectionOptions } from 'typeorm'
 import { PORT, PROD, OPTIONS } from './common/constants'
-import { logger } from './common/logger'
-import rootRoute from './routes/root'
-import ingredientsRoute from './routes/ingredients'
-import cocktailsRoute from './routes/cocktails'
-import mealsRoute from './routes/meals'
-import userRoute from './routes/user'
-import memberRoute from './routes/member'
-import { handleNotFound } from './middleware/not-found'
+import { router } from './routes/router'
+import { notFoundHandler } from './middleware/not-found-handler'
+import { errorHandler } from './middleware/error-handler'
 import { cleanUpExpiredSessions } from './common/maintenance'
+import { logger } from './common/logger'
 
+// Server Configuration:
 const app = express()
+app.use(express.json())
+app.use(cookieParser())
+app.use(cors({ credentials: true, origin: config.get('client.url') }))
+app.use(router)
+app.use(notFoundHandler)
+app.use(errorHandler)
 
-const start = async () => {
+const main = async () => {
    try {
       // Database Connection:
       await createConnection({
@@ -26,34 +29,20 @@ const start = async () => {
          port: config.get('database.port'),
          username: config.get('database.username'),
          password: config.get('database.password'),
-         database: config.get('database.database-name'),
+         database: config.get('database.name'),
          entities: config.get('typeorm.entities'),
          migrations: config.get('typeorm.migrations'),
          synchronize: !PROD,
          logging: OPTIONS.debug || OPTIONS.sqlLogs
       } as ConnectionOptions)
 
-      // Server Configuration:
-      app.use(express.json({ extended: false } as Parameters<typeof express.json>[0]))
-      app.use(cookieParser())
-      app.use(cors({ credentials: true, origin: config.get('client.url') }))
-
       cleanUpExpiredSessions.start()
-      
-      // Routes:
-      app.use('/', rootRoute)
-      app.use('/ingredients', ingredientsRoute)
-      app.use('/cocktails', cocktailsRoute)
-      app.use('/meals', mealsRoute)
-      app.use('/user', userRoute)
-      app.use('/member', memberRoute)
-      app.use(handleNotFound)
 
       app.listen(PORT, () => logger.info(`Server started on port ${PORT}`))
    }
-   catch (err) {
+   catch (err: unknown) {
       logger.error(err)
    }
 }
 
-start()
+main()

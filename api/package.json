@@ -1,15 +1,15 @@
 {
    "name": "gastronomy-api",
    "version": "1.0.0",
-   "description": "",
+   "description": "REST API that provides meal and cocktail recipes",
    "main": "index.js",
    "scripts": {
-      "build": "tsc",
-      "watch": "tsc -w",
+      "start": "node dist/index.js",
       "dev": "nodemon dist/index.js",
+      "build": "npx tsc",
+      "watch": "npx tsc -w",
       "test": "jest",
-      "deploy": "node dist/deployment/index.js",
-      "start": "node dist/index.js"
+      "deploy": "node dist/deployment/index.js"
    },
    "author": "Nikita Mezhenskyi",
    "license": "BSD-3-Clause",

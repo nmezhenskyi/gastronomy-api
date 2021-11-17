@@ -1,110 +1,84 @@
 import { getRepository } from 'typeorm'
 import bcrypt from 'bcrypt'
 import { Member, MemberRole } from '../models/member'
-import { ServiceResponse } from './service-response'
 import { TokenService } from './token-service'
+import { ApiError } from '../exceptions/api-error'
 
 export const MemberService = {
    /**
     * Finds members in the database that match given conditions.
     * 
-    * @param searchBy Search condition
-    * @param offset Search offset
-    * @param limit Search limit
-    * @returns ServiceResponse object with array of found members
+    * @param searchBy Search condition.
+    * @param offset Search offset.
+    * @param limit Search limit.
+    * @returns Array of found members.
     */
    async find(searchBy?: {
       firstName?: string,
       lastName?: string,
       role?: MemberRole
-   }, offset = 0, limit = 10): Promise<ServiceResponse<Member[]>> {
-      try {
-         const repository = getRepository(Member)
+   }, offset = 0, limit = 50): Promise<Member[]> {
+      const repo = getRepository(Member)
 
-         const members = await repository.find({
-            select: ['id', 'firstName', 'lastName', 'email', 'role'],
-            where: searchBy,
-            order: { createdAt: 'DESC' },
-            skip: offset,
-            take: limit
-         })
+      const members = await repo.find({
+         select: ['id', 'firstName', 'lastName', 'email', 'role'],
+         where: searchBy,
+         order: { createdAt: 'DESC' },
+         skip: offset,
+         take: limit
+      })
 
-         if (!members || members.length === 0) return { success: false, message: 'NOT_FOUND' }
+      if (!members || !members.length) throw ApiError.NotFound('No members were found')
 
-         return {
-            success: true,
-            message: 'FOUND',
-            body: members
-         }
-      }
-      catch (err) {
-         return { success: false, message: 'FAILED' }
-      }
+      return members
    },
 
    /**
     * Finds one member in the database that matches given conditions.
     * 
-    * @param searchBy Search condition
-    * @returns ServiceResponse object with found user
+    * @param searchBy Search condition.
+    * @returns Found member.
     */
-   async findOne(searchBy?: { id?: string, email?: string }): Promise<ServiceResponse<Member>> {
-      try {
-         const repository = getRepository(Member)
+   async findOne(searchBy?: { id?: string, email?: string }): Promise<Member> {
+      const repo = getRepository(Member)
 
-         const member = await repository.findOne({
-            select: ['id', 'firstName', 'lastName', 'email', 'role'],
-            where: searchBy
-         })
+      const member = await repo.findOne({
+         select: ['id', 'firstName', 'lastName', 'email', 'role'],
+         where: searchBy
+      })
 
-         if (!member) return { success: false, message: 'NOT_FOUND' }
+      if (!member) throw ApiError.NotFound('Member not found')
 
-         return {
-            success: true,
-            message: 'FOUND',
-            body: member
-         }
-      }
-      catch (err) {
-         return { success: false, message: 'FAILED' }
-      }
+      return member
    },
 
    /**
-    * Finds member by credetials. If password doesn't match, returns *NOT_FOUND*.
+    * Finds member by credetials.  
+    * If password doesn't match, throws `ApiError.NotFound`.
     * 
-    * @param email Member's email
-    * @param rawPassword Member's password
-    * @returns ServiceResponse object with found member
+    * @param email Member's email.
+    * @param rawPassword Member's password.
+    * @returns Found member.
     */
-   async findByCredentials(email: string, rawPassword: string): Promise<ServiceResponse<Member>> {
-      try {
-         const repository = getRepository(Member)
+   async findByCredentials(email: string, rawPassword: string): Promise<Member> {
+      const repo = getRepository(Member)
 
-         const member = await repository.findOne({ where: { email }})
+      const member = await repo.findOne({ where: { email }})
 
-         if (!member) return { success: false, message: 'NOT_FOUND' }
+      if (!member) throw ApiError.NotFound('Member not found')
 
-         const passwordsMatch = await bcrypt.compare(rawPassword, member.password)
+      const passwordsMatch = await bcrypt.compare(rawPassword, member.password)
 
-         if (!passwordsMatch) return { success: false, message: 'NOT_FOUND' }
+      if (!passwordsMatch) throw ApiError.NotFound('Member not found')
 
-         return {
-            success: true,
-            message: 'FOUND',
-            body: { ...member, password: '' }
-         }
-      }
-      catch (err) {
-         return { success: false, message: 'FAILED' }
-      }
+      return { ...member, password: '' }
    },
 
    /**
     * Adds the member to the database.
     * 
-    * @param memberDto Information about new member account
-    * @returns ServiceResponse object with created member
+    * @param memberDto New member information.
+    * @returns Created member.
     */
    async create(memberDto: {
       email: string,
@@ -112,62 +86,46 @@ export const MemberService = {
       firstName: string,
       lastName: string,
       role: 'Creator' | 'Supervisor'
-   }): Promise<ServiceResponse<Member>> {
-      try {
-         const repository = getRepository(Member)
+   }): Promise<Member> {
+      const repo = getRepository(Member)
 
-         const found = await repository.findOne({ email: memberDto.email })
+      const found = await repo.findOne({ email: memberDto.email })
 
-         if (found) return { success: false, message: 'INVALID' }
+      if (found) throw ApiError.BadRequest('Member account with this email already exists')
 
-         const member = new Member()
-         member.email = memberDto.email
-         member.password = await bcrypt.hash(memberDto.password, 10)
-         member.firstName = memberDto.firstName
-         member.lastName = memberDto.lastName
-         if (memberDto.role === 'Creator') member.role = MemberRole.CREATOR
-         else if (memberDto.role === 'Supervisor') member.role = MemberRole.SUPERVISOR
+      const member = new Member()
+      member.email = memberDto.email
+      member.password = await bcrypt.hash(memberDto.password, 10)
+      member.firstName = memberDto.firstName
+      member.lastName = memberDto.lastName
+      if (memberDto.role === 'Creator') member.role = MemberRole.CREATOR
+      else if (memberDto.role === 'Supervisor') member.role = MemberRole.SUPERVISOR
 
-         const saved = await repository.save(member)
+      const created = await repo.save(member)
 
-         return {
-            success: true,
-            message: 'CREATED',
-            body: { ...saved, password: '' }
-         }
-      }
-      catch (err) {
-         return { success: false, message: 'FAILED' }
-      }
+      return { ...created, password: '' }
    },
 
    /**
     * Verifies member's credentials and issues an access token.
     * 
-    * @param email Member's email
-    * @param password Member's password
-    * @returns ServiceResponse object with access token string
+    * @param email Member's email.
+    * @param password Member's password.
+    * @returns Access token string.
     */
-   async login(email: string, password: string): Promise<ServiceResponse<string>> {
+   async login(email: string, password: string): Promise<string> {
       const member = await this.findByCredentials(email, password)
 
-      if (member.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-      if (member.message === 'FAILED' || !member.body) return { success: false, message: 'FAILED' }
+      const { accessToken } = TokenService.generateTokens({ member: { id: member.id, role: member.role.toString() } })
 
-      const { accessToken } = TokenService.generateTokens({ member: { id: member.body.id, role: member.body.role.toString() } })
-
-      return {
-         success: true,
-         message: 'FOUND',
-         body: accessToken
-      }
+      return accessToken
    },
 
    /**
     * Updates the member in the database.
     * 
-    * @param memberDto Updated member information
-    * @returns ServiceResponse object with updated member
+    * @param memberDto Member id and updated information.
+    * @returns Updated member.
     */
    async update(memberDto: {
       id: string,
@@ -176,60 +134,42 @@ export const MemberService = {
       firstName?: string,
       lastName?: string,
       role?: 'Creator' | 'Supervisor'
-   }): Promise<ServiceResponse<Member>> {
-      try {
-         const repository = getRepository(Member)
+   }): Promise<Member> {
+      const repo = getRepository(Member)
 
-         const member = await repository.findOne(memberDto.id)
+      const member = await repo.findOne(memberDto.id)
 
-         if (!member) return { success: false, message: 'NOT_FOUND' }
+      if (!member) throw ApiError.NotFound('Member not found')
 
-         if (memberDto.email) member.email = memberDto.email
-         if (memberDto.password) member.password = await bcrypt.hash(memberDto.password, 10)
-         if (memberDto.firstName) member.firstName = memberDto.firstName
-         if (memberDto.lastName) member.lastName = memberDto.lastName
-         if (memberDto.role) {
-            if (memberDto.role === 'Creator') member.role = MemberRole.CREATOR
-            else if (memberDto.role === 'Supervisor') member.role = MemberRole.SUPERVISOR
-         }
-
-         const saved = await repository.save(member)
-
-         return {
-            success: true,
-            message: 'UPDATED',
-            body: { ...saved, password: '' }
-         }
+      if (memberDto.email) member.email = memberDto.email
+      if (memberDto.password) member.password = await bcrypt.hash(memberDto.password, 10)
+      if (memberDto.firstName) member.firstName = memberDto.firstName
+      if (memberDto.lastName) member.lastName = memberDto.lastName
+      if (memberDto.role) {
+         if (memberDto.role === 'Creator') member.role = MemberRole.CREATOR
+         else if (memberDto.role === 'Supervisor') member.role = MemberRole.SUPERVISOR
       }
-      catch (err) {
-         return { success: false, message: 'FAILED' }
-      }
+
+      const updated = await repo.save(member)
+
+      return { ...updated, password: '' }
    },
 
    /**
     * Removes specified member account from the database.
     * 
-    * @param id Member's id
-    * @returns ServiceResponse object
+    * @param id Member id.
+    * @returns Removed member.
     */
-   async remove(id: string): Promise<ServiceResponse<null>> {
-      try {
-         const repository = getRepository(Member)
+   async remove(id: string): Promise<Member> {
+      const repository = getRepository(Member)
 
-         const member = await repository.findOne(id)
+      const member = await repository.findOne(id)
 
-         if (!member) return { success: false, message: 'NOT_FOUND' }
+      if (!member) throw ApiError.NotFound('Member not found')
 
-         await repository.remove(member)
+      await repository.remove(member)
 
-         return {
-            success: true,
-            message: 'REMOVED',
-            body: null
-         }
-      }
-      catch (err) {
-         return { success: false, message: 'FAILED' }
-      }
+      return member
    }
 }

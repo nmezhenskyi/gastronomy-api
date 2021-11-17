@@ -1,336 +1,219 @@
 import { getRepository } from 'typeorm'
 import { MealReview } from '../models/meal-review'
 import { CocktailReview } from '../models/cocktail-review'
-import { ServiceResponse } from './service-response'
 import { MealService } from './meal-service'
 import { CocktailService } from './cocktail-service'
 import { UserService } from './user-service'
-import { logger } from '../common/logger'
+import { ApiError } from '../exceptions/api-error'
 
 export const ReviewService = {
    /**
     * Saves meal review.
     * 
-    * @param mealId Meal id
-    * @param userId User id
-    * @param body New meal review
-    * @returns ServiceResponse object with created meal review
+    * @param mealId Meal id.
+    * @param userId User id.
+    * @param body New meal review.
+    * @returns Created meal review.
     */
     async createMealReview(userId: string, mealId: string, body: {
       rating: number,
       review: string
-   }): Promise<ServiceResponse<MealReview>> {
-      try {
-         const meal = await MealService.findOne({ id: mealId })
-         if (meal.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-         if (meal.message === 'FAILED' || !meal.body) return { success: false, message: 'FAILED' }
+   }): Promise<MealReview> {
+      const meal = await MealService.findOne({ id: mealId })
+      const user = await UserService.findOne({ id: userId })
 
-         const user = await UserService.findOne({ id: userId })
-         if (user.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-         if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
+      if (body.rating < 0 || body.rating > 5) throw ApiError.BadRequest('Invalid rating')
 
-         if (body.rating < 0 || body.rating > 5) return { success: false, message: 'INVALID' }
+      const repository = getRepository(MealReview)
+      const mealReview = new MealReview()
+      mealReview.meal = meal
+      mealReview.user = user
+      mealReview.rating = body.rating
+      mealReview.review = body.review
+      const created = await repository.save(mealReview)
 
-         const repository = getRepository(MealReview)
-         const mealReview = new MealReview()
-         mealReview.meal = meal.body
-         mealReview.user = user.body
-         mealReview.rating = body.rating
-         mealReview.review = body.review
-         const saved = await repository.save(mealReview)
-
-         return {
-            success: true,
-            message: 'CREATED',
-            body: saved
-         }
-      }
-      catch (err) {
-         logger.error(`ReviewService.createMealReview(): ${err}`)
-         return { success: false, message: 'FAILED' }
-      }
+      return created
    },
 
    /**
     * Updates meal review.
     * 
-    * @param userId User id
-    * @param mealId Meal id
-    * @param body Updated meal review
-    * @returns ServiceResponse object with updated meal review
+    * @param userId User id.
+    * @param mealId Meal id.
+    * @param body Updated meal review.
+    * @returns Updated meal review.
     */
    async updateMealReview(userId: string, mealId: string, body: {
       rating?: number,
       review?: string
-   }): Promise<ServiceResponse<MealReview>> {
-      try {
-         const repository = getRepository(MealReview)
-         const mealReview = await repository.findOne({ where: { userId, mealId } })
-         if (!mealReview) return { success: false, message: 'NOT_FOUND' }
-
-         if (body.rating) {
-            if (body.rating < 0 || body.rating > 5) return { success: false, message: 'INVALID' }
-            mealReview.rating = body.rating
-         }
-         if (body.review) mealReview.review = body.review
-
-         const saved = await repository.save(mealReview)
-
-         return {
-            success: true,
-            message: 'UPDATED',
-            body: saved
-         }
+   }): Promise<MealReview> {
+      const repository = getRepository(MealReview)
+      const mealReview = await repository.findOne({ where: { userId, mealId } })
+      if (!mealReview) throw ApiError.NotFound('Meal review not found')
+      if (body.rating) {
+         if (body.rating < 0 || body.rating > 5) throw ApiError.BadRequest('Invalid rating')
+         mealReview.rating = body.rating
       }
-      catch (err) {
-         logger.error(`ReviewService.updateMealReview(): ${err}`)
-         return { success: false, message: 'FAILED' }
-      }
+      if (body.review) mealReview.review = body.review
+      const saved = await repository.save(mealReview)
+
+      return saved
    },
 
    /**
     * Removes meal review.
     * 
-    * @param userId User id
-    * @param mealId Meal id
-    * @returns ServiceResponse object
+    * @param userId User id.
+    * @param mealId Meal id.
+    * @returns Removed meal review.
     */
-   async removeMealReview(userId: string, mealId: string): Promise<ServiceResponse<null>> {
-      try {
+   async removeMealReview(userId: string, mealId: string): Promise<MealReview> {
          const repository = getRepository(MealReview)
          const mealReview = await repository.findOne({ where: { userId, mealId } })
-         if (!mealReview) return { success: false, message: 'NOT_FOUND' }
-
+         if (!mealReview) throw ApiError.NotFound('Meal review not found')
          await repository.remove(mealReview)
 
-         return {
-            success: true,
-            message: 'REMOVED',
-            body: null
-         }
-      }
-      catch (err) {
-         logger.error(`ReviewService.removeMealReview(): ${err}`)
-         return { success: false, message: 'FAILED' }
-      }
+         return mealReview
    },
 
    /**
     * Finds meal review by user id and meal id.
     * 
-    * @param userId User id
-    * @param mealId Meal id
-    * @returns ServiceResponse object with found meal review
+    * @param userId User id.
+    * @param mealId Meal id.
+    * @returns Found meal review.
     */
-   async findMealReview(userId: string, mealId: string): Promise<ServiceResponse<MealReview>> {
-      try {
-         const repository = getRepository(MealReview)
-         const found = await repository.findOne({ where: { userId, mealId } })
-         if (!found) return { success: false, message: 'NOT_FOUND' }
+   async findOneMealReview(userId: string, mealId: string): Promise<MealReview> {
+      const repository = getRepository(MealReview)
+      const review = await repository.findOne({ where: { userId, mealId } })
+      if (!review) throw ApiError.NotFound('Meal review not found')
 
-         return {
-            success: true,
-            message: 'FOUND',
-            body: found
-         }
-      }
-      catch (err) {
-         logger.error(`ReviewService.findMealReview(): ${err}`)
-         return { success: false, message: 'FAILED' }
-      }
+      return review
    },
 
    /**
     * Finds meal reviews that match given conditions.
     * 
-    * @param searchBy Search condition
-    * @param offset Search offset
-    * @param limit Search limit
-    * @returns ServiceResponse object with array of found meal reviews
+    * @param searchBy Search condition.
+    * @param offset Search offset.
+    * @param limit Search limit.
+    * @returns Array of found meal reviews.
     */
-   async findMealReviews(searchBy?: { userId?: string, mealId?: string }, offset = 0, limit = 0): Promise<ServiceResponse<MealReview[]>> {
-      try {
-         const repository = getRepository(MealReview)
-         const found = await repository.find({
-            where: searchBy,
-            order: { createdAt: 'DESC' },
-            skip: offset,
-            take: limit
-         })
-         if (!found || found.length === 0) return { success: false, message: 'NOT_FOUND' }
+   async findMealReviews(searchBy?: { userId?: string, mealId?: string }, offset = 0, limit = 50): Promise<MealReview[]> {
+      const repository = getRepository(MealReview)
+      const reviews = await repository.find({
+         where: searchBy,
+         order: { createdAt: 'DESC' },
+         skip: offset,
+         take: limit
+      })
+      if (!reviews || !reviews.length) throw ApiError.NotFound('No meal reviews were found')
 
-         return {
-            success: true,
-            message: 'FOUND',
-            body: found
-         }
-      }
-      catch (err) {
-         logger.error(`ReviewService.findMealReviews(): ${err}`)
-         return { success: false, message: 'FAILED' }
-      }
+      return reviews
    },
 
    /**
     * Saves cocktail review.
     * 
-    * @param userId User id
-    * @param cocktailId Cocktail id
-    * @param body New cocktail review
-    * @returns ServiceResponse object with created cocktail review
+    * @param userId User id.
+    * @param cocktailId Cocktail id.
+    * @param body New cocktail review.
+    * @returns Created cocktail review.
     */
    async createCocktailReview(userId: string, cocktailId: string, body: {
       rating: number,
       review: string
-   }): Promise<ServiceResponse<CocktailReview>> {
-      try {
-         const cocktail = await CocktailService.findOne({ id: cocktailId })
-         if (cocktail.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-         if (cocktail.message === 'FAILED' || !cocktail.body) return { success: false, message: 'FAILED' }
+   }): Promise<CocktailReview> {
+      const cocktail = await CocktailService.findOne({ id: cocktailId })
+      const user = await UserService.findOne({ id: userId })
 
-         const user = await UserService.findOne({ id: userId })
-         if (user.message === 'NOT_FOUND') return { success: false, message: 'NOT_FOUND' }
-         if (user.message === 'FAILED' || !user.body) return { success: false, message: 'FAILED' }
+      if (body.rating < 0 || body.rating > 5) throw ApiError.BadRequest('Invalid rating')
 
-         if (body.rating < 0 || body.rating > 5) return { success: false, message: 'INVALID' }
+      const repository = getRepository(CocktailReview)
+      const cocktailReview = new CocktailReview()
+      cocktailReview.cocktail = cocktail
+      cocktailReview.user = user
+      cocktailReview.rating = body.rating
+      cocktailReview.review = body.review
+      const created = await repository.save(cocktailReview)
 
-         const repository = getRepository(CocktailReview)
-         const cocktailReview = new CocktailReview()
-         cocktailReview.cocktail = cocktail.body
-         cocktailReview.user = user.body
-         cocktailReview.rating = body.rating
-         cocktailReview.review = body.review
-         const saved = await repository.save(cocktailReview)
-
-         return {
-            success: true,
-            message: 'CREATED',
-            body: saved
-         }
-      }
-      catch (err) {
-         logger.error(`ReviewService.createCocktailReview(): ${err}`)
-         return { success: false, message: 'FAILED' }
-      }
+      return created
    },
 
    /**
     * Updates cocktail review.
     * 
-    * @param userId User id
-    * @param cocktailId Meal id
-    * @param body Updated cocktail review
+    * @param userId User id.
+    * @param cocktailId Meal id.
+    * @param body Updated cocktail review.
     * @returns 
     */
    async updateCocktailReview(userId: string, cocktailId: string, body: {
       rating?: number,
       review?: string
-   }): Promise<ServiceResponse<CocktailReview>> {
-      try {
-         const repository = getRepository(CocktailReview)
-         const cocktailReview = await repository.findOne({ where: { userId, cocktailId } })
-         if (!cocktailReview) return { success: false, message: 'NOT_FOUND' }
-
-         if (body.rating) {
-            if (body.rating < 0 || body.rating > 5) return { success: false, message: 'INVALID' }
-            cocktailReview.rating = body.rating
-         }
-         if (body.review) cocktailReview.review = body.review
-
-         const saved = await repository.save(cocktailReview)
-
-         return {
-            success: true,
-            message: 'UPDATED',
-            body: saved
-         }
+   }): Promise<CocktailReview> {
+      const repository = getRepository(CocktailReview)
+      const cocktailReview = await repository.findOne({ where: { userId, cocktailId } })
+      if (!cocktailReview) throw ApiError.NotFound('Cocktail review not found')
+      if (body.rating) {
+         if (body.rating < 0 || body.rating > 5) throw ApiError.BadRequest('Invalid rating')
+         cocktailReview.rating = body.rating
       }
-      catch (err) {
-         logger.error(`ReviewService.updateCocktailReview(): ${err}`)
-         return { success: false, message: 'FAILED' }
-      }
+      if (body.review) cocktailReview.review = body.review
+      const updated = await repository.save(cocktailReview)
+
+      return updated
    },
 
    /**
     * Removes cocktail review.
     * 
-    * @param userId User id
-    * @param cocktailId Cocktail id
-    * @returns ServiceResponse object
+    * @param userId User id.
+    * @param cocktailId Cocktail id.
+    * @returns Removed cocktail review.
     */
-   async removeCocktailReview(userId: string, cocktailId: string): Promise<ServiceResponse<null>> {
-      try {
+   async removeCocktailReview(userId: string, cocktailId: string): Promise<CocktailReview> {
          const repository = getRepository(CocktailReview)
          const cocktailReview = await repository.findOne({ where: { userId, cocktailId } })
-         if (!cocktailReview) return { success: false, message: 'NOT_FOUND' }
-
+         if (!cocktailReview) throw ApiError.NotFound('Cocktail review not found')
          await repository.remove(cocktailReview)
 
-         return {
-            success: true,
-            message: 'REMOVED',
-            body: null
-         }
-      }
-      catch (err) {
-         logger.error(`ReviewService.removeCocktailReview(): ${err}`)
-         return { success: false, message: 'FAILED' }
-      }
+         return cocktailReview
    },
 
    /**
     * Finds cocktail review by user id and cocktail id.
     * 
-    * @param userId User id
-    * @param cocktailId Meal id
-    * @returns ServiceResponse object with found cocktail review
+    * @param userId User id.
+    * @param cocktailId Meal id.
+    * @returns Found cocktail review.
     */
-   async findCocktailReview(userId: string, cocktailId: string): Promise<ServiceResponse<CocktailReview>> {
-      try {
-         const repository = getRepository(CocktailReview)
-         const found = await repository.findOne({ where: { userId, cocktailId } })
-         if (!found) return { success: false, message: 'NOT_FOUND' }
+   async findOneCocktailReview(userId: string, cocktailId: string): Promise<CocktailReview> {
+      const repository = getRepository(CocktailReview)
+      const review = await repository.findOne({ where: { userId, cocktailId } })
+      if (!review) throw ApiError.NotFound('Cocktail review not found')
 
-         return {
-            success: true,
-            message: 'FOUND',
-            body: found
-         }
-      }
-      catch (err) {
-         logger.error(`ReviewService.findCocktailReview(): ${err}`)
-         return { success: false, message: 'FAILED' }
-      }
+      return review
    },
 
    /**
     * Finds cocktail reviews that match given conditions.
     * 
-    * @param searchBy Search condition
-    * @param offset Search offset
-    * @param limit Search limit
-    * @returns ServiceResponse object with array of found cocktail reviews
+    * @param searchBy Search condition.
+    * @param offset Search offset.
+    * @param limit Search limit.
+    * @returns Array of found cocktail reviews.
     */
-   async findCocktailReviews(searchBy?: { userId?: string, cocktailId?: string }, offset = 0, limit = 0): Promise<ServiceResponse<CocktailReview[]>> {
-      try {
-         const repository = getRepository(CocktailReview)
-         const found = await repository.find({
-            where: searchBy,
-            order: { createdAt: 'DESC' },
-            skip: offset,
-            take: limit
-         })
-         if (!found || found.length === 0) return { success: false, message: 'NOT_FOUND' }
+   async findCocktailReviews(searchBy?: { userId?: string, cocktailId?: string }, offset = 0, limit = 0): Promise<CocktailReview[]> {
+      const repository = getRepository(CocktailReview)
+      const reviews = await repository.find({
+         where: searchBy,
+         order: { createdAt: 'DESC' },
+         skip: offset,
+         take: limit
+      })
+      if (!reviews || !reviews.length) throw ApiError.NotFound('No cocktail reviews were found')
 
-         return {
-            success: true,
-            message: 'FOUND',
-            body: found
-         }
-      }
-      catch (err) {
-         logger.error(`ReviewService.findCocktailReviews(): ${err}`)
-         return { success: false, message: 'FAILED' }
-      }
+      return reviews
    }
 }

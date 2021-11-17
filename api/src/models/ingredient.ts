@@ -31,13 +31,13 @@ export class Ingredient {
       type: 'text',
       nullable: true
    })
-   description: string | null
+   description!: string | null
 
    @OneToMany(() => CocktailToIngredient, cocktailToIngredient => cocktailToIngredient.ingredient)
-   cocktails: CocktailToIngredient[]
+   cocktails!: CocktailToIngredient[]
 
    @OneToMany(() => MealToIngredient, mealToIngredient => mealToIngredient.ingredient)
-   meals: MealToIngredient[]
+   meals!: MealToIngredient[]
 
    @CreateDateColumn()
    createdAt!: Date

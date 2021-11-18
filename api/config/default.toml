@@ -2,6 +2,7 @@
 
 title = "API Config"
 documentation = "https://github.com/nmezhenskyi/gastronomy-api"
+version = "1.0.0"
 
 [environment]
 host = "localhost"

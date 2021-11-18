@@ -9,7 +9,10 @@ export const MainController = {
     * @returns documentation url
     */
    root(_: Request, res: Response, __: NextFunction) {   
-      return res.status(200).json({ documentation: config.get('documentation') })
+      return res.status(200).json({
+         documentation: config.get('documentation'),
+         version: config.get('version')
+      })
    },
 
    /**

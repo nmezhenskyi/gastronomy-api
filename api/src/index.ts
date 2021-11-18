@@ -6,6 +6,7 @@ import cors from 'cors'
 import { createConnection, ConnectionOptions } from 'typeorm'
 import { PORT, PROD, OPTIONS } from './common/constants'
 import { router } from './routes/router'
+import { rateLimiter } from './middleware/rate-limiter'
 import { notFoundHandler } from './middleware/not-found-handler'
 import { errorHandler } from './middleware/error-handler'
 import { cleanUpExpiredSessions } from './common/maintenance'
@@ -16,6 +17,7 @@ const app = express()
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({ credentials: true, origin: config.get('client.url') }))
+app.use(rateLimiter)
 app.use(router)
 app.use(notFoundHandler)
 app.use(errorHandler)

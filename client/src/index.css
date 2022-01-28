@@ -1,1 +1,50 @@
+:root {
+   --bg-color: #fff;
+   --main-color: #f2e3b4;
+   --secondary-color: #395442;
+   --white: #fff;
+   --black: #333;
+   --title-color: #ac9377;
+   --small-text: 1.7rem;
+}
 
+* {
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+}
+
+html {
+   font-size: 62.5%;
+}
+
+body {
+   font-family: Arial, Helvetica, sans-serif;
+   font-size: 1.6rem;
+   background: var(--bg-color);
+   color: var(--black);
+}
+
+a {
+   text-decoration: none;
+   color: #fff;
+}
+
+ul {
+   list-style: none;
+}
+
+img {
+   width: 100%;
+}
+
+.container {
+   width: 80%;
+   max-width: 1400px;
+   margin: 0 auto;
+   overflow: hidden;
+}
+
+.page-content {
+   margin: 4rem 0;
+}

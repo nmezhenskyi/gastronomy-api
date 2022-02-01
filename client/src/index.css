@@ -5,7 +5,7 @@
    --white: #fff;
    --black: #333;
    --title-color: #ac9377;
-   --small-text: 1.7rem;
+   --small-text: 1.8rem;
 }
 
 * {
@@ -19,8 +19,9 @@ html {
 }
 
 body {
-   font-family: Arial, Helvetica, sans-serif;
-   font-size: 1.6rem;
+   /* font-family: Arial, Helvetica, sans-serif; */
+   font-family: 'Alegreya Sans', sans-serif;
+   font-size: 1.8rem;
    background: var(--bg-color);
    color: var(--black);
 }

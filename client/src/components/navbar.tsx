@@ -11,16 +11,16 @@ export const Navbar = () => {
       <div className="navbar">
          <nav className="container">
             <div className="left">
-               <Link to="/">
+               <Link to="/" className="logo">
                   <h1>Gastronomy</h1>
                </Link>
                <Link to="/meals">
                   Meals
                </Link>
-               <Link to="/meals">
+               <Link to="/cocktails">
                   Cocktails
                </Link>
-               <Link to="/meals">
+               <Link to="/recipes">
                   All
                </Link>
                <Searchbar />

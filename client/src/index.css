@@ -5,7 +5,9 @@
    --white: #fff;
    --black: #333;
    --title-color: #ac9377;
+
    --small-text: 1.8rem;
+   --big-text: 3rem;
 }
 
 * {

@@ -1,0 +1,10 @@
+footer {
+   background: var(--secondary-color);
+   color: var(--main-color);
+   text-align: center;
+   padding: 3rem 0;
+}
+
+footer .copyright {
+   font-size: var(--small-text);
+}

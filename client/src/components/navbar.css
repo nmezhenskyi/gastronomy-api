@@ -1,0 +1,52 @@
+.navbar {
+   background: var(--main-color);
+   color: var(--secondary-color);
+   padding: 1rem 0;
+}
+
+.navbar nav {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   font-size: 2rem;
+}
+
+.navbar nav a {
+   text-transform: capitalize;
+   font-size: 2rem;
+   color: var(--secondary-color);
+   line-height: 1.2;
+   height: 50px;
+}
+
+.navbar nav a:hover {
+   color: #517a5f;
+}
+
+.navbar nav a h1 {
+   line-height: 1.7;
+}
+
+.navbar nav .left {
+   display: flex;
+   align-items: center;
+   height: 100%;
+}
+
+.navbar nav .left > *:not(:first-child) {
+   height: 100%;
+   margin: 0 auto;
+}
+
+.navbar nav .left > *:not(:last-child) {
+   margin-right: 2rem;
+}
+
+.navbar nav .left .logo h1 {
+   font-weight: 700;
+   margin-right: 4rem;
+}
+
+.navbar nav .right *:not(:last-child) {
+   margin-right: 3rem;
+}

@@ -1,0 +1,105 @@
+:root {
+   --bg-color: #fff;
+   --main-color: #f2e3b4;
+   --secondary-color: #395442;
+   --white: #fff;
+   --black: #333;
+   --title-color: #ac9377;
+
+   --tiny-text: 1.6rem;
+   --small-text: 1.8rem;
+   --big-text: 3rem;
+}
+
+* {
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+}
+
+html {
+   font-size: 62.5%;
+}
+
+body {
+   /* font-family: Arial, Helvetica, sans-serif; */
+   font-family: 'Alegreya Sans', sans-serif;
+   font-size: 1.8rem;
+   background: var(--bg-color);
+   color: var(--black);
+}
+
+a {
+   text-decoration: none;
+   color: #fff;
+}
+
+ul {
+   list-style: none;
+}
+
+img {
+   width: 100%;
+}
+
+.container {
+   width: 80%;
+   max-width: 1400px;
+   margin: 0 auto;
+   overflow: hidden;
+}
+
+.page-content {
+   margin: 4rem 0;
+}
+
+.hint {
+   text-align: center;
+}
+
+.hint a {
+   color: inherit;
+}
+
+
+form {
+   text-align: center;
+}
+
+form h3 {
+   font-size: 2.8rem;
+   margin: 0 auto 3rem;
+}
+
+form .form-group {
+   margin: 2rem 0;
+}
+
+form .form-group label {
+   font-size: 1.6rem;
+   margin-bottom: 0.5rem;
+}
+
+form .form-group label,
+form .form-group input[type="text"],
+form .form-group input[type="email"],
+form .form-group input[type="password"],
+form .form-group textarea {
+   display: block;
+   text-align: left;
+   width: 100%;
+}
+
+form .form-group input[type="text"],
+form .form-group input[type="email"],
+form .form-group input[type="password"],
+form .form-group textarea {
+   font-size: 2rem;
+}
+
+form button[type="submit"] {
+   display: block;
+   width: 100%;
+   cursor: pointer;
+   margin-top: 5rem;
+}

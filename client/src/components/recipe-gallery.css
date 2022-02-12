@@ -1,0 +1,34 @@
+.recipe-gallery {
+   margin: 4rem 0;
+   text-align: center;
+}
+
+.recipe-gallery .container {
+   display: grid;
+   grid-template-columns: repeat(3, 1fr);
+   gap: 4rem;
+}
+
+.recipe-gallery .error,
+.recipe-gallery .loading {
+   font-size: var(--big-text);
+}
+
+.recipe-gallery .recipe-card {
+   background: rgb(73, 73, 73);
+   color: white;
+   padding: 2rem;
+   border-radius: 4px;
+   box-shadow: 3px 3px 3px rgba(0,0,0,0.05);
+   transition: all 0.3s ease;
+   position: relative;
+}
+
+.recipe-gallery .recipe-card:hover {
+   transform: rotate(3deg);
+}
+
+.recipe-gallery .recipe-card h3 {
+   color: #555;
+   margin-bottom: 6px;
+}

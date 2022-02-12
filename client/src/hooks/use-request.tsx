@@ -11,16 +11,20 @@ interface RequestOptions {
    data?: any
 }
 
-export const useRequest = (reqOptions: RequestOptions) => {
+export const useRequest = (reqOptions?: RequestOptions) => {
    const [response, setResponse] = useState<any>(null)
    const [isPending, setIsPending] = useState(false)
    const [error, setError] = useState<string | null>(null)
-   const [options] = useState(reqOptions)
+   const [options, setOptions] = useState(reqOptions)
+
+   const makeRequest = (reqOptions: RequestOptions) => {
+      setOptions(reqOptions)
+   }
 
    useEffect(() => {
       const controller = new AbortController()
 
-      const makeRequest = async (request: RequestOptions) => {
+      const send = async (request: RequestOptions) => {
          setIsPending(true)
    
          try {
@@ -41,12 +45,17 @@ export const useRequest = (reqOptions: RequestOptions) => {
          }
       }
 
-      makeRequest(options)
+      if(options) send(options)
 
       return () => {
          controller.abort()
       }
    }, [options])
 
-   return { response, isPending, error }
+   return {
+      response,
+      isPending,
+      error,
+      makeRequest
+   }
 }

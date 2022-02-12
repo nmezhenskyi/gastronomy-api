@@ -6,6 +6,7 @@
    --black: #333;
    --title-color: #ac9377;
 
+   --tiny-text: 1.6rem;
    --small-text: 1.8rem;
    --big-text: 3rem;
 }
@@ -50,4 +51,55 @@ img {
 
 .page-content {
    margin: 4rem 0;
+}
+
+.hint {
+   text-align: center;
+}
+
+.hint a {
+   color: inherit;
+}
+
+
+form {
+   text-align: center;
+}
+
+form h3 {
+   font-size: 2.8rem;
+   margin: 0 auto 3rem;
+}
+
+form .form-group {
+   margin: 2rem 0;
+}
+
+form .form-group label {
+   font-size: 1.6rem;
+   margin-bottom: 0.5rem;
+}
+
+form .form-group label,
+form .form-group input[type="text"],
+form .form-group input[type="email"],
+form .form-group input[type="password"],
+form .form-group textarea {
+   display: block;
+   text-align: left;
+   width: 100%;
+}
+
+form .form-group input[type="text"],
+form .form-group input[type="email"],
+form .form-group input[type="password"],
+form .form-group textarea {
+   font-size: 2rem;
+}
+
+form button[type="submit"] {
+   display: block;
+   width: 100%;
+   cursor: pointer;
+   margin-top: 5rem;
 }

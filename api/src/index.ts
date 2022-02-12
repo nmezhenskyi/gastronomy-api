@@ -3,6 +3,7 @@ import express from 'express'
 import config from 'config'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import helmet from 'helmet'
 import { createConnection, ConnectionOptions } from 'typeorm'
 import { PORT, PROD, OPTIONS } from './common/constants'
 import { router } from './routes/router'
@@ -17,6 +18,7 @@ const app = express()
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({ credentials: true, origin: config.get('client.url') }))
+app.use(helmet())
 app.use(rateLimiter)
 app.use(router)
 app.use(notFoundHandler)
